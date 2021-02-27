@@ -36,7 +36,7 @@ public class Principal {
        
         while((aux = lex.nextToken()).getType() != Token.EOF){
             //para formacao da parte direita do token
-            String direita_token = "'" + aux.getText() + "'"; // usada para montagem do token <...,direita_token>
+            String direita_token = "'" + aux.getText() + "'"; // usada para montagem do token <getText(),direita_token>
             // System.out.print("<"+aux.getType()+","+aux.getText()+">");
 
             // verifica se foi indentificado algum dos erros léxicos definidos na gramática
@@ -53,8 +53,6 @@ public class Principal {
                 case "NUM_REAL":
                     direita_token = LALexer.VOCABULARY.getDisplayName(aux.getType());       // forma token <'aux.getText()','NUM_REAL'>
                     break;
-                default:
-                    saida.write(("<'" + aux.getText() + "'," + direita_token+ ">\n").getBytes()); //forma token padrao das palavras chaves e simbolos <'aux.getText()','aux.getText()'>
             }
                    
         
@@ -65,7 +63,7 @@ public class Principal {
                     saida.close();
                     return;
                 default:
-                    saida.write(("<'" + aux.getText() + "'," + direita_token+ ">\n").getBytes()); //caso nao tenha identificado erro lexico, imprime o token padrao <'aux.getText()','aux.getText()'>
+                    saida.write(("<'" + aux.getText() + "'," + direita_token+ ">\n").getBytes()); //forma token padrao das palavras chaves e simbolos <'aux.getText()','aux.getText()'>
             }
         }
         saida.close();
