@@ -51,7 +51,7 @@ CADEIA: '"'(~('"'|'\n'))*'"';
 
 /* definicao de numeros inteiros    */
 /* formados pela sequencia de 1 ou + caracteres numericos de 0 a 9. */
-NUM_INT: ('0'..'9)+;
+NUM_INT: ('0'..'9')+;
 
 /* definicao de numeros reais   */
 NUM_REAL: ('0'..'9')+'.'('0'..'9')+;
