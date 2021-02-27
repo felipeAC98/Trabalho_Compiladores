@@ -31,11 +31,43 @@ public class Principal {
         
         CharStream cs= CharStreams.fromFileName(args[0]);       //leitura do arquivo de entrada
         LALexer lex = new LALexer(cs); 
-       //FileOutputStream writer = new FileOutputStream(args[1]); //usada para escrever no arquivo de saída
-       Token aux;
+        FileOutputStream saida = new FileOutputStream(args[1]); //usada para escrever no arquivo de saída
+        Token aux;
        
         while((aux = lex.nextToken()).getType() != Token.EOF){
-            System.out.print("<"+aux.getType()+","+aux.getText()+">");
+            //para formacao da parte direita do token
+            String direita_token = "'" + aux.getText() + "'"; // usada para montagem do token <...,direita_token>
+            // System.out.print("<"+aux.getType()+","+aux.getText()+">");
+
+            // verifica se foi indentificado algum dos erros léxicos definidos na gramática
+            switch (LALexer.VOCABULARY.getDisplayName(aux.getType())) {
+                case "IDENT":
+                    direita_token = LALexer.VOCABULARY.getDisplayName(aux.getType());       // forma token <'aux.getText()','IDENT'>
+                    break;
+                case "CADEIA":
+                    direita_token = LALexer.VOCABULARY.getDisplayName(aux.getType());       // forma token <'aux.getText()','CADEIA'>
+                    break;
+                case "NUM_INT":
+                    direita_token = LALexer.VOCABULARY.getDisplayName(aux.getType());       // forma token <'aux.getText()','NUM_INT'>
+                    break;
+                case "NUM_REAL":
+                    direita_token = LALexer.VOCABULARY.getDisplayName(aux.getType());       // forma token <'aux.getText()','NUM_REAL'>
+                    break;
+                default:
+                    saida.write(("<'" + aux.getText() + "'," + direita_token+ ">\n").getBytes()); //forma token padrao das palavras chaves e simbolos <'aux.getText()','aux.getText()'>
+            }
+                   
+        
+            // verifica erros lexicos definidos na gramática
+            switch (LALexer.VOCABULARY.getDisplayName(aux.getType())) {
+                case "ERRO_SIMBOLO":
+                    saida.write(("Linha " + aux.getLine() + ": " + aux.getText() + " - simbolo nao identificado\n").getBytes());    //imprime a linha de erro e o tipo de erro
+                    saida.close();
+                    return;
+                default:
+                    saida.write(("<'" + aux.getText() + "'," + direita_token+ ">\n").getBytes()); //caso nao tenha identificado erro lexico, imprime o token padrao <'aux.getText()','aux.getText()'>
+            }
         }
+        saida.close();
     }
 }

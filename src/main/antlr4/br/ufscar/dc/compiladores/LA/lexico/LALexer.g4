@@ -7,9 +7,9 @@
 /* ------------------------------------------------------------ */				
 
 
-lexer gramar LALexer;
+lexer grammar LALexer;
 
-//define palavras reservadas (palavres chaves) da linguagem LAlexer
+/* define palavras reservadas (palavres chaves) da linguagem LAlexer */
 PALAVRAS_CHAVE: 'algoritmo' | 'fim_algoritmo'
 				| 'declare' | 'constante' | 'tipo' 
 				| 'literal' | 'inteiro' | 'real' | 'logico'
@@ -27,38 +27,38 @@ PALAVRAS_CHAVE: 'algoritmo' | 'fim_algoritmo'
 
 
 
-// define operadores aritmeticos 
+/* define operadores aritmeticos */
 OPERADORES_ARITMETICOS: '+' | '-' | '*' | '/' |'%';
 
-// define operadores relacionais
+/* define operadores relacionais */
 OP_RELACIONAL: '=' | '<>' | '>=' | '<=' | '>' | '<';
 
-// define operador logicos
+/* define operador logicos  */
 OP_LOGICOs: 'ou' | 'e';
 
-// define caracteres que nao sao letras
+/* define caracteres que nao sao letras  */
 SIMBOLOS: ':' | '=' | ',' | '.' | '[' | ']' | '^' | '(' | ')' | '..' | '-' | '&';
 
-//define identificadores da linguagem 
-//apenas com restricao de nao inicializar com caracteres numericos, podendo conter apenas _ como caractere especial alem de letras e numeros
+/* define identificadores da linguagem */
+/* apenas com restricao de nao inicializar com caracteres numericos, podendo conter apenas _ como caractere especial alem de letras e numeros */
 IDENT: ('A'..'Z' | 'a'..'z' | '_')('A'..'Z' | 'a'..'z' | '0'..'9' | '_');
 
 
-//define cadeias da linguagem
-//sequencia ao longo do algoritmo que necessariamente comeca e finaliza com aspas
-//onde entre essas aspas nao pode ocorrer " ou quebra de linha 
+/* define cadeias da linguagem  */
+/* sequencia ao longo do algoritmo que necessariamente comeca e finaliza com aspas  */
+/* onde entre essas aspas nao pode ocorrer " ou quebra de linha     */
 CADEIA: '"'(~('"'|'\n'))*'"';
 
-//definicao de numeros inteiros
-//formados pela sequencia de 1 ou + caracteres numericos de 0 a 9.
+/* definicao de numeros inteiros    */
+/* formados pela sequencia de 1 ou + caracteres numericos de 0 a 9. */
 NUM_INT: ('0'..'9)+;
 
-//definicao de numeros reais
-NUM_REAL: ('0'..'9')+ '.' ('0'..'9')+;
+/* definicao de numeros reais   */
+NUM_REAL: ('0'..'9')+'.'('0'..'9')+;
 
-//definicao para erro - simbolo nao identificado, nao faz parte da linguagem
-ERRO:.;
+/* definicao para erro - simbolo nao identificado, nao faz parte da linguagem   */
+ERRO:'@' | '$' | '¨' | '.' | '~' | '!';
 
-//definicao para erro de cadeia
+/* definicao para erro de cadeia?   */
 
-//definicao para erro de comentario
+/* definicao para erro de comentario?   */
