@@ -43,6 +43,8 @@ SIMBOLOS: ':' | '=' | ',' | '.' | '[' | ']' | '^' | '(' | ')' | '..' | '-' | '&'
 /* apenas com restricao de nao inicializar com caracteres numericos, podendo conter apenas _ como caractere especial alem de letras e numeros */
 IDENT: ('A'..'Z' | 'a'..'z' | '_')('A'..'Z' | 'a'..'z' | '0'..'9' | '_');
 
+/* comentarios nao devem gerar tokens
+COMENTARIO: '{'(~('{')*'}'-> skip;
 
 /* define cadeias da linguagem  */
 /* sequencia ao longo do algoritmo que necessariamente comeca e finaliza com aspas  */
@@ -58,6 +60,9 @@ NUM_REAL: ('0'..'9')+'.'('0'..'9')+;
 
 /* definicao para erro - simbolo nao identificado, nao faz parte da linguagem   */
 ERRO:'@' | '$' | '¨' | '.' | '~' | '!';
+
+/* nao gerar token para espacos, tabulacoes, quebras de linha
+WS: (' ' | '\t' | '\r' | '\n' ) -> skip;
 
 /* definicao para erro de cadeia?   */
 

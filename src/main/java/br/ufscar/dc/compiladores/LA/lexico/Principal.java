@@ -32,12 +32,12 @@ public class Principal {
         CharStream cs= CharStreams.fromFileName(args[0]);       //leitura do arquivo de entrada
         LALexer lex = new LALexer(cs); 
         FileOutputStream saida = new FileOutputStream(args[1]); //usada para escrever no arquivo de saída
-        Token aux;
+        Token aux = null;
        
         while((aux = lex.nextToken()).getType() != Token.EOF){
+            //System.out.print("<"+LALexer.VOCABULARY.getDisplayName(aux.getType())+","+aux.getText()+">");
             //para formacao da parte direita do token
             String direita_token = "'" + aux.getText() + "'"; // usada para montagem do token <getText(),direita_token>
-            // System.out.print("<"+aux.getType()+","+aux.getText()+">");
 
             // verifica se foi indentificado algum dos erros léxicos definidos na gramática
             switch (LALexer.VOCABULARY.getDisplayName(aux.getType())) {
