@@ -17,7 +17,7 @@ PALAVRAS_CHAVE: 'algoritmo' | 'fim_algoritmo'
 				| 'registro' | 'fim_registro' 
 				| 'procedimento' | 'fim_procedimento'
 				| 'funcao' | 'fim_funcao'
-				| 'var' | 'leia' | 'escreva'|
+				| 'var' | 'leia' | 'escreva'
 				| 'se' | 'entao' | 'senao' | 'fim_se'
 				| 'caso' | 'seja' | 'fim_caso' 
 				| 'para' | 'ate' | 'faca' | 'fim_para'
@@ -37,7 +37,7 @@ OP_RELACIONAL: '=' | '<>' | '>=' | '<=' | '>' | '<';
 OP_LOGICOs: 'ou' | 'e';
 
 /* define caracteres que nao sao letras  */
-SIMBOLOS: ':' | '=' | ',' | '.' | '[' | ']' | '^' | '(' | ')' | '..' | '-' | '&';
+SIMBOLOS: ':' | '=' | ',' | '[' | ']' | '^' | '(' | ')' | '-' | '&';
 
 /* define identificadores da linguagem */
 /* apenas com restricao de nao inicializar com caracteres numericos, podendo conter apenas _ como caractere especial alem de letras e numeros */
@@ -62,7 +62,7 @@ NUM_REAL: ('0'..'9')+'.'('0'..'9')+;
 ERRO:'@' | '$' | '¨' | '.' | '~' | '!';
 
 /* nao gerar token para espacos, tabulacoes, quebras de linha
-WS: (' ' | '\t' | '\r' | '\n' ) -> skip;
+WS: [ \t\r\n]+ -> skip;
 
 /* definicao para erro de cadeia?   */
 
