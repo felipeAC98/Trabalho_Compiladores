@@ -10,7 +10,7 @@ lexer grammar LALexer;
 
 /*comentarios nao devem gerar tokens*/
 COMENTARIO: '{'
-            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u00c0'..'\u00f0' | '\u002c')*
+            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u00c0'..'\u00f0' | '(' | ')' | ',')*
             '}' 
             -> skip;
 
