@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------ */
 /*   >>  TRABALHO 1 - CONSTRUÇÃO DE COMPILADORES 1   <<         */
 /*								*/ 
-/*		ALUNOS: Felipe Alves        RA:             	*/
+/*		ALUNOS: Felipe Alves        RA: 744335         	*/
 /*			Karolayne Arrais    RA: 746460		*/	
 /*			Mariana Zagatti     RA:	628620  	*/
 /* ------------------------------------------------------------ */				
