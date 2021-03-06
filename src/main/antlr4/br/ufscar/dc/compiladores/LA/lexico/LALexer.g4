@@ -2,7 +2,7 @@
 /*   >>  TRABALHO 1 - CONSTRUÇÃO DE COMPILADORES 1   <<         */
 /*								*/ 
 /*		ALUNOS: Felipe Alves        RA: 744335         	*/
-/*			Karolayne Arrais    RA: 746460		*/	
+/*			Karolayne Arrais    RA: 726460		*/	
 /*			Mariana Zagatti     RA:	628620  	*/
 /* ------------------------------------------------------------ */				
 
@@ -64,6 +64,7 @@ ERRO_CADEIA: '"'(~('"'|'\n'))*;
 NUM_INT: ('0'..'9')+; 
 
 /* definicao de numeros reais  */
+/* seelhante ao numero int, com a regra de ter o caractere '.' entre duas sequencias de caracteres numericos de 0 a 9.*/
 NUM_REAL: ('0'..'9')+'.'('0'..'9')+; 
 
 /* definicao para erro - simbolo nao identificado, nao faz parte da linguagem  */
