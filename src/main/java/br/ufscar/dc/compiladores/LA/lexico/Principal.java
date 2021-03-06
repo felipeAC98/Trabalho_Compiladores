@@ -7,9 +7,9 @@
 /* ------------------------------------------------------------ */
 /*   >>  TRABALHO 1 - CONSTRUÇÃO DE COMPILADORES 1   <<         */
 /*								*/ 
-/*		ALUNOS: Felipe Alves        RA:             	*/
+/*		ALUNOS: Felipe Alves        RA: 744335       	*/
 /*			Karolayne Arrais    RA: 746460		*/	
-/*			Mariana Zagatti     RA:			*/
+/*			Mariana Zagatti     RA:	628620		*/
 /* ------------------------------------------------------------ */
 
 package br.ufscar.dc.compiladores.LA.lexico;
@@ -64,6 +64,10 @@ public class Principal {
                     return;
                 case "COMENTARIO_ERRADO":
                     saida.write(("Linha " + aux.getLine() + ": comentario nao fechado\n").getBytes());    //imprime a linha de erro e o tipo de erro
+                    saida.close();
+                    return;
+                case "ERRO_CADEIA":
+                    saida.write(("Linha " + aux.getLine() + ": cadeia literal nao fechada\n").getBytes());    //imprime a linha de erro e o tipo de erro
                     saida.close();
                     return;
                 default:

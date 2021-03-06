@@ -11,13 +11,13 @@ lexer grammar LALexer;
 
 /*comentarios nao devem gerar tokens*/
 COMENTARIO: '{'
-            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS)*
+            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS | ERRO_SIMBOLO)*
             '}' 
             -> skip;
 
 /* definicao para erro de comentario */
 COMENTARIO_ERRADO: '{'
-            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS)*
+            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS | ERRO_SIMBOLO)*
             ;
 
 /* define palavras reservadas (palavres chaves) da linguagem LAlexer*/
@@ -58,6 +58,9 @@ IDENT: ('A'..'Z' | 'a'..'z' | '_')('A'..'Z' | 'a'..'z' | '0'..'9' | '_')*;
 /* onde entre essas aspas nao pode ocorrer " ou quebra de linha */
 CADEIA: '"'(~('"'|'\n'))*'"';    
 
+/* definicao para erro de cadeia  */
+ERRO_CADEIA: '"'(~('"'|'\n'))*;
+
 /* definicao de numeros inteiros    */
 /* formados pela sequencia de 1 ou + caracteres numericos de 0 a 9.*/
 NUM_INT: ('0'..'9')+; 
@@ -66,9 +69,7 @@ NUM_INT: ('0'..'9')+;
 NUM_REAL: ('0'..'9')+'.'('0'..'9')+; 
 
 /* definicao para erro - simbolo nao identificado, nao faz parte da linguagem  */
-ERRO:'@' | '$' | '¨' | '.' | '~' | '!'; 
+ERRO_SIMBOLO:'@' | '$' | '¨' | '.' | '~' | '!' | ';'; 
 
 /* nao gerar token para espacos, tabulacoes, quebras de linha */
-WS: [ \t\r\n]+ -> skip; 
-
-/* definicao para erro de cadeia?   */
+WS: [ \t\r\n]+ -> skip;    
