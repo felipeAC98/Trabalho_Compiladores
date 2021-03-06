@@ -13,7 +13,7 @@ Trabalho da disciplina de compiladores da UFSCAR - Professor Lucredio
 
 - Abra o CMD do windows neste diretorio
 
-- Execute o seguinte comando: java -jar target/TrabalhoCompiladores-1.0-SNAPSHOT-jar-with-dependencies.jar codigoEntrada.txt
+- Execute o seguinte comando: java -jar target/TrabalhoCompiladores-1.0-SNAPSHOT-jar-with-dependencies.jar codigoEntrada.txt codigoSaida.txt
 
 ### Arquivo de gramatica LALexer.g4
 

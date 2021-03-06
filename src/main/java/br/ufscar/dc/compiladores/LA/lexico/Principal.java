@@ -62,6 +62,10 @@ public class Principal {
                     saida.write(("Linha " + aux.getLine() + ": " + aux.getText() + " - simbolo nao identificado\n").getBytes());    //imprime a linha de erro e o tipo de erro
                     saida.close();
                     return;
+                case "COMENTARIO_ERRADO":
+                    saida.write(("Linha " + aux.getLine() + ": comentario nao fechado\n").getBytes());    //imprime a linha de erro e o tipo de erro
+                    saida.close();
+                    return;
                 default:
                     saida.write(("<'" + aux.getText() + "'," + direita_token+ ">\n").getBytes()); //forma token padrao das palavras chaves e simbolos <'aux.getText()','aux.getText()'>
             }

@@ -8,11 +8,17 @@
 
 lexer grammar LALexer;
 
+
 /*comentarios nao devem gerar tokens*/
 COMENTARIO: '{'
-            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | '(' | ')' | ',' | SIMBOLOS)*
+            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS)*
             '}' 
             -> skip;
+
+/* definicao para erro de comentario */
+COMENTARIO_ERRADO: '{'
+            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS)*
+            ;
 
 /* define palavras reservadas (palavres chaves) da linguagem LAlexer*/
 PALAVRAS_CHAVE: 'algoritmo' | 'fim_algoritmo'
@@ -66,5 +72,3 @@ ERRO:'@' | '$' | '¨' | '.' | '~' | '!';
 WS: [ \t\r\n]+ -> skip; 
 
 /* definicao para erro de cadeia?   */
-
-/* definicao para erro de comentario?   */
