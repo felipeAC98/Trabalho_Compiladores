@@ -10,14 +10,13 @@ lexer grammar LALexer;
 
 
 /*comentarios nao devem gerar tokens*/
-COMENTARIO: '{'
-            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS | ERRO_SIMBOLO)*
+COMENTARIO: COMENTARIO_ERRADO
             '}' 
             -> skip;
 
 /* definicao para erro de comentario */
 COMENTARIO_ERRADO: '{'
-            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS | ERRO_SIMBOLO)*
+            (' ' | 'A'..'Z' | 'a'..'z' | '0'..'9' | '\u0080'..'\uffff' | SIMBOLOS | ERRO_SIMBOLO | CADEIA )*
             ;
 
 /* define palavras reservadas (palavres chaves) da linguagem LAlexer*/
@@ -33,10 +32,10 @@ PALAVRAS_CHAVE: 'algoritmo' | 'fim_algoritmo'
 				| 'caso' | 'seja' | 'fim_caso' 
 				| 'para' | 'ate' | 'faca' | 'fim_para'
 				| 'enquanto' | 'fim_enquanto' 
-				| 'retorne' | 'nao' | '<-'; 
+				| 'retorne' | 'nao' | '<-' ; 
 
 /* define caracteres que nao sao letras */
-SIMBOLOS: ':' | '=' | ',' | '[' | ']' | '^' | '(' | ')' | '-' | '&'; 
+SIMBOLOS: ':' | '=' | ',' | '[' | ']' | '^' | '(' | ')' | '-' | '&' | '.'; 
 
 /* define operadores aritmeticos */
 OPERADORES_ARITMETICOS: '+' | '-' | '*' | '/' |'%';
@@ -46,7 +45,6 @@ OP_RELACIONAL: '=' | '<>' | '>=' | '<=' | '>' | '<';
 
 /* define operador logicos */
 OP_LOGICOs: 'ou' | 'e'; 
-
 
 
 /* define identificadores da linguagem
@@ -69,7 +67,7 @@ NUM_INT: ('0'..'9')+;
 NUM_REAL: ('0'..'9')+'.'('0'..'9')+; 
 
 /* definicao para erro - simbolo nao identificado, nao faz parte da linguagem  */
-ERRO_SIMBOLO:'@' | '$' | '¨' | '.' | '~' | '!' | ';'; 
+ERRO_SIMBOLO:'@' | '$' | '¨' | '~' | '!' | ';'; 
 
 /* nao gerar token para espacos, tabulacoes, quebras de linha */
 WS: [ \t\r\n]+ -> skip;    
