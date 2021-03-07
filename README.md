@@ -1,5 +1,6 @@
-# Trabalho_Compiladores
+# Trabalho 1 - Analisador léxico
 Trabalho da disciplina de Construção de Compiladores da UFSCAR - Professor Daniel Lucrédio
 
-### Trabalho 1 - Analisador léxico
-Branch Trabalho1
+[Arquivo executável](target/TrabalhoCompiladores-1.0-SNAPSHOT-jar-with-dependencies.jar)
+
+[Documentação externa](Compiladores_T1.pdf)
