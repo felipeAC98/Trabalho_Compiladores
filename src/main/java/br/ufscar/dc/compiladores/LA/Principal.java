@@ -5,7 +5,7 @@
  */
 
 /* ------------------------------------------------------------------------------*/
-/*           >>  TRABALHO 1 - CONSTRUÇÃO DE COMPILADORES 1   <<                  */
+/*           >>  TRABALHO 2 - CONSTRUÇÃO DE COMPILADORES 1   <<                  */
 /*                                                                               */ 
 /*                  ALUNOS: Felipe Alves        RA: 744335                       */
 /*                          Karolayne Arrais    RA: 726460                       */	
@@ -39,9 +39,11 @@ public class Principal {
         LALexer lex = new LALexer(cs);
         FileOutputStream saida = new FileOutputStream(args[1]); //utilizado para escrita no arquivo de saida apos analisa lexica
         Token aux = null;   //token auxiliar para analise
-        CommonTokenStream tokens = new CommonTokenStream(lex);
+        
+        //Definicoes para verificacoes de sintaxe
+        CommonTokenStream tokens = new CommonTokenStream(lex);     
         LAParser parser = new LAParser(tokens);
-        parser.programa();
+        LAErrorListener LAEL = new LAErrorListener(saida); 
         
         //Verificando erros lexicos aqui
         while((aux = lex.nextToken()).getType() != Token.EOF){  //enquanto tivermos caracteres no arquivo de entrada para serem analisados 
@@ -66,10 +68,21 @@ public class Principal {
             }
         }
         
-        //parte para retornar ao comeco do arquivo e tratar erro sintatico
+        //movendo para o inicio do arquivo novamente
+        cs.seek(0);
+        lex.setInputStream(cs);
         
-        //Fecha o arquivo
+        lex.removeErrorListeners();
+        //inserindo o errorListener criado
+        lex.addErrorListener(LAEL);
+
+        parser.removeErrorListeners();
+        parser.addErrorListener(LAEL);
+        parser.programa();       
+        
+        saida.write(("Fim da compilacao\n").getBytes());
         saida.close();
+        return;    
         
     }
 }
