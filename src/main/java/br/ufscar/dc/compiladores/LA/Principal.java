@@ -45,6 +45,9 @@ public class Principal {
         LAParser parser = new LAParser(tokens);
         LAErrorListener LAEL = new LAErrorListener(saida); 
         
+        //Variavel para armazenar a ocorrencia de erro
+        Boolean ERROR=false;
+        
         //Verificando erros lexicos aqui
         while((aux = lex.nextToken()).getType() != Token.EOF){  //enquanto tivermos caracteres no arquivo de entrada para serem analisados 
 
@@ -55,30 +58,34 @@ public class Principal {
             switch (LALexer.VOCABULARY.getDisplayName(aux.getType())) {
                 case "ERRO_SIMBOLO":
                     saida.write(("Linha " + aux.getLine() + ": " + aux.getText() + " - simbolo nao identificado\n").getBytes());    //imprime a linha de erro e o tipo de erro
-                    saida.close();
-                    return;
+                    ERROR=true;
+                    break;
+                    
                 case "COMENTARIO_ERRADO":
                     saida.write(("Linha " + aux.getLine() + ": comentario nao fechado\n").getBytes());    //imprime a linha de erro e o tipo de erro
-                    saida.close();
-                    return;
+                    ERROR=true;
+                    break;
+                    
                 case "ERRO_CADEIA":
                     saida.write(("Linha " + aux.getLine() + ": cadeia literal nao fechada\n").getBytes());    //imprime a linha de erro e o tipo de erro
-                    saida.close();
-                    return;
+                    ERROR=true;
+                    break;
             }
         }
         
-        //movendo para o inicio do arquivo novamente
-        cs.seek(0);
-        lex.setInputStream(cs);
-        
-        lex.removeErrorListeners();
-        //inserindo o errorListener criado
-        lex.addErrorListener(LAEL);
+        if(ERROR==false){
+            //movendo para o inicio do arquivo novamente
+            cs.seek(0);
+            lex.setInputStream(cs);
 
-        parser.removeErrorListeners();
-        parser.addErrorListener(LAEL);
-        parser.programa();       
+            lex.removeErrorListeners();
+            //inserindo o errorListener criado
+            lex.addErrorListener(LAEL);
+
+            parser.removeErrorListeners();
+            parser.addErrorListener(LAEL);
+            parser.programa();       
+        }
         
         saida.write(("Fim da compilacao\n").getBytes());
         saida.close();
