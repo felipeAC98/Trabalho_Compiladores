@@ -43,7 +43,8 @@ public class Principal {
         //Definicoes para verificacoes de sintaxe
         CommonTokenStream tokens = new CommonTokenStream(lex);     
         LAParser parser = new LAParser(tokens);
-        LAErrorListener LAEL = new LAErrorListener(saida); 
+        int maxErrosEsperados=1; 
+        LAErrorListener LAEL = new LAErrorListener(saida,maxErrosEsperados); 
         
         //Variavel para armazenar a ocorrencia de erro
         Boolean ERROR=false;

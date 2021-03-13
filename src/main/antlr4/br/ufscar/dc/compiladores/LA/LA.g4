@@ -71,7 +71,7 @@ NUM_REAL: ('0'..'9')+'.'('0'..'9')+;
 ERRO_SIMBOLO: SIMBOLO_NAODEFINIDO | '}'; 
 
 /* definicao para erro - simbolo nao identificado, nao faz parte da linguagem  */
-SIMBOLO_NAODEFINIDO:'@' | '$' | '¨' | '~' | '!' | ';' | '%' | '?'; 
+SIMBOLO_NAODEFINIDO:'@' | '$' | '¨' | '~' | '!' | ';' | '%' | '?'| '|'; 
 
 /* nao gerar token para espacos, tabulacoes, quebras de linha */
 WS: [ \t\r\n]+ -> skip;

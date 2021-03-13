@@ -31,24 +31,27 @@ import java.util.logging.Logger;
 public class LAErrorListener extends BaseErrorListener{
     
     FileOutputStream saida;
+    int maxErrosEsperados;
+    int nErrosObtidos;
     Boolean firstError = true; //vai armazenar a mensagem de erro que queremos exibir
     
-    public LAErrorListener(FileOutputStream saida){
+    public LAErrorListener(FileOutputStream saida, int maxErrosEsperados){
         this.saida=saida;
+        this.maxErrosEsperados=maxErrosEsperados;
     }
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
         String erro_simbolo = ((Token) offendingSymbol).getText();
         
-        if (firstError == true){ // verificação para apresentar apenas a primeira mensagem de erro
+        if (nErrosObtidos < maxErrosEsperados){ // verificação para apresentar apenas a primeira mensagem de erro
             try {
                 this.saida.write(("Linha " + line + ": erro sintatico proximo a " + ((erro_simbolo == "<EOF>") ? "EOF" : erro_simbolo) + "\n").getBytes());
             } catch (IOException ex) {
                 Logger.getLogger(LAErrorListener.class.getName()).log(Level.SEVERE, null, ex);
             }
             
-            firstError=false;
+            nErrosObtidos=nErrosObtidos+1;
         }
     }
 }
