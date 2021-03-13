@@ -8,6 +8,7 @@
 
 grammar LA;
 
+/*TRABALHO 1*/
 
 /*comentarios nao devem gerar tokens*/
 COMENTARIO: COMENTARIO_ERRADO
@@ -78,6 +79,8 @@ WS: [ \t\r\n]+ -> skip;
 
 // definicao da gramatica da linguagem LA definida no manual disponibilizado
 // ? para sintaxe nao gananciosa  - zero ou uma vez
+
+/*TRABALHO 2*/
 
 programa: declaracoes 'algoritmo' corpo 'fim_algoritmo';
 
@@ -162,4 +165,4 @@ op_relacional: '=' | '<>' | '>=' | '<=' | '>' | '<';
 expressao: termo_logico (op_logico_1 termo_logico)*;
 termo_logico: fator_logico (op_logico_2 fator_logico)*;
 fator_logico: ('nao')? parcela_logica;
-parcela_logica: ('verdadeiro' | 'falso')* | exp_relacional;
+parcela_logica: ('verdadeiro' | 'falso') | exp_relacional;

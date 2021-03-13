@@ -18,7 +18,6 @@
 /* ----------------------------------------------------------------------------- */
 
 package br.ufscar.dc.compiladores.LA;
-import java.io.FileOutputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -30,23 +29,29 @@ import java.util.logging.Logger;
 
 public class LAErrorListener extends BaseErrorListener{
     
-    FileOutputStream saida;
-    int maxErrosEsperados;
-    int nErrosObtidos;
-    Boolean firstError = true; //vai armazenar a mensagem de erro que queremos exibir
+    FileOutputStream saida;     //arquivo onde imprimirá a saída
+    int maxErrosEsperados;      //quantos erros serão imprimidos na saída (no caso é 1)
+    int nErrosObtidos;          //quantos erros foram efetivamente encontrados
     
     public LAErrorListener(FileOutputStream saida, int maxErrosEsperados){
+        //ao ser chamado recebe o arquivo onde imprimirá a saída e o máximo de erros a serem impressos
+        //o construtor atribui os parâmetros recebidos aos atributos
         this.saida=saida;
         this.maxErrosEsperados=maxErrosEsperados;
     }
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        String erro_simbolo = ((Token) offendingSymbol).getText();
+        //pega uma string com o erro
+        String erroEncontrado = ((Token) offendingSymbol).getText();
         
-        if (nErrosObtidos < maxErrosEsperados){ // verificação para apresentar apenas a primeira mensagem de erro
+        // verificação para apresentar apenas a primeira mensagem de erro
+        //pois uma vez que é encontrado um erro o resto torna-se irrelevante
+        if (nErrosObtidos < maxErrosEsperados){
             try {
-                this.saida.write(("Linha " + line + ": erro sintatico proximo a " + ((erro_simbolo == "<EOF>") ? "EOF" : erro_simbolo) + "\n").getBytes());
+                //quando o erro está próximo a EOF, o erro é pegado como <EOF>
+                //então modificamos a mensagem para ficar correta
+                this.saida.write(("Linha " + line + ": erro sintatico proximo a " + ("<EOF>".equals(erroEncontrado) ? "EOF" : erroEncontrado) + "\n").getBytes());
             } catch (IOException ex) {
                 Logger.getLogger(LAErrorListener.class.getName()).log(Level.SEVERE, null, ex);
             }

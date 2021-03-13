@@ -35,19 +35,23 @@ import org.antlr.v4.runtime.Token;
 public class Principal {
     public static void main(String args[]) throws IOException{
         
-        CharStream cs= CharStreams.fromFileName(args[0]);       //utilizado para leitura do arquivo passado como entrada contendo codigo com programa em linguagem algoritmica 
-        LALexer lex = new LALexer(cs);
+        CharStream cs = CharStreams.fromFileName(args[0]);      //utilizado para leitura do arquivo passado como entrada contendo codigo com programa em linguagem algoritmica 
+                                                                // pega o primeiro argumento passado por comando
+        LALexer lex = new LALexer(cs);                          //para verificação léxica
         FileOutputStream saida = new FileOutputStream(args[1]); //utilizado para escrita no arquivo de saida apos analisa lexica
-        Token aux = null;   //token auxiliar para analise
+                                                                //pega o segundo argumento passado por linha de comando
+        Token aux = null;                                       //token auxiliar para analise
         
-        //Definicoes para verificacoes de sintaxe
+        //Definicoes para as verificacoes de sintaxe
+        //criando um listener para detectar erros sintáticos
+        //considerando apenas 1 erro
         CommonTokenStream tokens = new CommonTokenStream(lex);     
         LAParser parser = new LAParser(tokens);
-        int maxErrosEsperados=1; 
-        LAErrorListener LAEL = new LAErrorListener(saida,maxErrosEsperados); 
+        int maxErrosEsperados = 1; 
+        LAErrorListener LAEL = new LAErrorListener(saida, maxErrosEsperados); 
         
         //Variavel para armazenar a ocorrencia de erro
-        Boolean ERROR=false;
+        Boolean ERROR = false;
         
         //Verificando erros lexicos aqui
         while((aux = lex.nextToken()).getType() != Token.EOF){  //enquanto tivermos caracteres no arquivo de entrada para serem analisados 
@@ -55,7 +59,7 @@ public class Principal {
             //para formacao da parte direita do token
             String direita_token = "'" + aux.getText() + "'"; // usada para montagem do token <getText(),direita_token>
            
-            // verifica erros lexicos definidos na gramatica - trabalho 1 - ainda eh preciso printar o erro lexico
+            // verifica erros lexicos definidos na gramatica - trabalho 1
             switch (LALexer.VOCABULARY.getDisplayName(aux.getType())) {
                 case "ERRO_SIMBOLO":
                     saida.write(("Linha " + aux.getLine() + ": " + aux.getText() + " - simbolo nao identificado\n").getBytes());    //imprime a linha de erro e o tipo de erro
@@ -76,11 +80,12 @@ public class Principal {
         
         if(ERROR==false){
             //movendo para o inicio do arquivo novamente
+            //para analisar novamente e ver a ocorrência de erros 
             cs.seek(0);
             lex.setInputStream(cs);
-
+            
+            //associando o errorListener criado com o lexer e com o parser
             lex.removeErrorListeners();
-            //inserindo o errorListener criado
             lex.addErrorListener(LAEL);
 
             parser.removeErrorListeners();
@@ -89,7 +94,7 @@ public class Principal {
         }
         
         saida.write(("Fim da compilacao\n").getBytes());
-        saida.close();
+        saida.close(); //fecha o ponteiro do arquivo de saída
         return;    
         
     }
