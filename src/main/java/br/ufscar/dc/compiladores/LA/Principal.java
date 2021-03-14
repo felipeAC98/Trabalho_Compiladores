@@ -25,6 +25,7 @@
 
 package br.ufscar.dc.compiladores.LA;
 
+import br.ufscar.dc.compiladores.LA.LAParser.ProgramaContext;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import org.antlr.v4.runtime.CharStream;
@@ -94,6 +95,15 @@ public class Principal {
         }
         
         saida.write(("Fim da compilacao\n").getBytes());
+        
+        cs.seek(0);
+        lex.setInputStream(cs);
+        
+        ProgramaContext arvore = parser.programa();
+        LASemantico las = new LASemantico();
+        las.visitPrograma(arvore);
+        LASemanticoUtils.errosSemanticos.forEach((s) -> System.out.println(s));
+        
         saida.close(); //fecha o ponteiro do arquivo de saída
         return;    
         

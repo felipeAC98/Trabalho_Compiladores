@@ -8,8 +8,6 @@
 
 grammar LA;
 
-/*TRABALHO 1*/
-
 /*comentarios nao devem gerar tokens*/
 COMENTARIO: COMENTARIO_ERRADO
             '}'
@@ -80,13 +78,11 @@ WS: [ \t\r\n]+ -> skip;
 // definicao da gramatica da linguagem LA definida no manual disponibilizado
 // ? para sintaxe nao gananciosa  - zero ou uma vez
 
-/*TRABALHO 2*/
-
 programa: declaracoes 'algoritmo' corpo 'fim_algoritmo';
 
 declaracoes: (decl_local_global)*;
 
-decl_local_global: declaracao_local|declaracao_global;
+decl_local_global: declaracao_local | declaracao_global;
 
 declaracao_local:  'declare' variavel 
                   | 'constante' IDENT ':' tipo_basico '=' valor_constante
