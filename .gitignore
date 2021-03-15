@@ -1,2 +1,7 @@
-/TrabalhoCompiladores/target/
-target/
+target/classes/
+target/archive-tmp/
+maven-archiver/
+maven-status/
+test-classes/
+codigoEntrada.txt
+codigoSaida.txt
