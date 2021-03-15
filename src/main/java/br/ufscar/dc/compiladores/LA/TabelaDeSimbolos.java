@@ -15,7 +15,9 @@ import java.util.Map;
 public class TabelaDeSimbolos {
     public enum TipoLA{
         INTEIRO,
+        LITERAL,
         REAL,
+        LOGICO,
         INVALIDO
     }
     class EntradaTabelaDeSimbolos{

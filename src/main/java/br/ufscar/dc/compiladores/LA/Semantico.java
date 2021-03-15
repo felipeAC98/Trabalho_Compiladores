@@ -20,7 +20,8 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
     @Override
     public TipoLA visitPrograma(LAParser.ProgramaContext ctx) {
-        //tabela = new TabelaDeSimbolos();
+        //Inicializando tabela de simbolos
+        tabela = new TabelaDeSimbolos();
         return visitChildren(ctx);
     }
     
@@ -37,19 +38,30 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     @Override public TipoLA visitVariavel(LAParser.VariavelContext ctx) {
         
         String tipoVar=ctx.tipo().getText();
+        String nomeVar=ctx.identificador().get(0).getText();
+
         /*if(tipoVar!="literal" && tipoVar!="inteiro" && tipoVar!="real" && tipoVar!="logico"){
           System.out.println("Tipo errado: "+ tipoVar);    
         }*/
         
+        //Verificando se o simbolo foi digitado corretamente
         switch(tipoVar) {
             case "literal":
-                System.out.println("Tipo certo: "+ tipoVar); break;
+                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL);
+                //System.out.println("Tipo certo: "+ tipoVar); 
+                break;
             case "inteiro":
-                System.out.println("Tipo certo: "+ tipoVar); break;
+                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INTEIRO);
+                //System.out.println("Tipo certo: "+ tipoVar); 
+                break;
             case "real":
-                System.out.println("Tipo certo: "+ tipoVar); break;
+                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL);
+                //System.out.println("Tipo certo: "+ tipoVar); 
+                break;
             case "logico":
-                System.out.println("Tipo certo: "+ tipoVar); break;
+                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO);
+                //System.out.println("Tipo certo: "+ tipoVar); 
+                break;
             default:
                 String mensagem="tipo " + tipoVar  + " nao declarado";
             {
@@ -63,5 +75,21 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         }
 
         return visitChildren(ctx); 
+    }
+    
+    @Override public TipoLA visitCmdleia(LAParser.CmdleiaContext ctx) {
+        
+        //Verificando se todos identificadores que sao chamados no leia existem na tabela
+        if(tabela.existe(ctx.identificador().get(0).getText())==false){
+            String mensagem="identificador " + ctx.identificador().get(0).getText()  + " nao declarado";
+            try {
+                this.saida.write((String.format("Linha %d: %s\n", ctx.identificador().get(0).start.getLine(), mensagem)).getBytes());
+            } catch (IOException ex) {
+                Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return visitChildren(ctx);
+    
+    
     }
 }
