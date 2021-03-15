@@ -38,40 +38,46 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     @Override public TipoLA visitVariavel(LAParser.VariavelContext ctx) {
         
         String tipoVar=ctx.tipo().getText();
-        String nomeVar=ctx.identificador().get(0).getText();
 
         /*if(tipoVar!="literal" && tipoVar!="inteiro" && tipoVar!="real" && tipoVar!="logico"){
           System.out.println("Tipo errado: "+ tipoVar);    
         }*/
         
+        //Andando em todas variaveis de um identificador
+        
+         for (var parametro : ctx.identificador()) { 
+             
+            String nomeVar=parametro.getText();
+             
         //Verificando se o simbolo foi digitado corretamente
-        switch(tipoVar) {
-            case "literal":
-                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL);
-                //System.out.println("Tipo certo: "+ tipoVar); 
-                break;
-            case "inteiro":
-                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INTEIRO);
-                //System.out.println("Tipo certo: "+ tipoVar); 
-                break;
-            case "real":
-                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL);
-                //System.out.println("Tipo certo: "+ tipoVar); 
-                break;
-            case "logico":
-                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO);
-                //System.out.println("Tipo certo: "+ tipoVar); 
-                break;
-            default:
-                String mensagem="tipo " + tipoVar  + " nao declarado";
-            {
-                try {
-                    this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
-                } catch (IOException ex) {
-                    Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+            switch(tipoVar) {
+                case "literal":
+                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL);
+                    //System.out.println("Tipo certo: "+ tipoVar); 
+                    break;
+                case "inteiro":
+                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INTEIRO);
+                    //System.out.println("Tipo certo: "+ tipoVar); 
+                    break;
+                case "real":
+                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL);
+                    System.out.println("Tipo certo: "+ tipoVar); 
+                    break;
+                case "logico":
+                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO);
+                    //System.out.println("Tipo certo: "+ tipoVar); 
+                    break;
+                default:
+                    String mensagem="tipo " + tipoVar  + " nao declarado";
+                {
+                    try {
+                        this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
+                    } catch (IOException ex) {
+                        Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
+
             }
-  
         }
 
         return visitChildren(ctx); 
@@ -79,17 +85,26 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     
     @Override public TipoLA visitCmdleia(LAParser.CmdleiaContext ctx) {
         
-        //Verificando se todos identificadores que sao chamados no leia existem na tabela
-        if(tabela.existe(ctx.identificador().get(0).getText())==false){
-            String mensagem="identificador " + ctx.identificador().get(0).getText()  + " nao declarado";
-            try {
-                this.saida.write((String.format("Linha %d: %s\n", ctx.identificador().get(0).start.getLine(), mensagem)).getBytes());
-            } catch (IOException ex) {
-                Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+        //Verificando se todos identificadores/parametros que sao chamados no leia existem na tabela
+    
+        for (var parametro : ctx.identificador()) {
+            
+            for (var identificador : parametro.IDENT()) { 
+                    System.out.println(identificador); 
+                    
+                    if(tabela.existe(identificador.getText())==false){
+                        String mensagem="identificador " + identificador.getText()  + " nao declarado";
+                        try {
+                            this.saida.write((String.format("Linha %d: %s\n",  identificador.getSymbol().getLine(), mensagem)).getBytes());
+                        } catch (IOException ex) {
+                            Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+
+
             }
         }
+        
         return visitChildren(ctx);
-    
-    
     }
 }
