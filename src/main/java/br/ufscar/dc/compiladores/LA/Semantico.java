@@ -44,11 +44,20 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         }*/
         
         //Andando em todas variaveis de um identificador
-        
          for (var parametro : ctx.identificador()) { 
              
             String nomeVar=parametro.getText();
-             
+            
+            if(tabela.existe(nomeVar) == true){
+                
+                String mensagem="identificador " + nomeVar  + " ja declarado anteriormente";
+                try {
+                    this.saida.write((String.format("Linha %d: %s\n",  ctx.tipo().start.getLine(), mensagem)).getBytes());
+                } catch (IOException ex) {
+                    Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
         //Verificando se o simbolo foi digitado corretamente
             switch(tipoVar) {
                 case "literal":
@@ -61,7 +70,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                     break;
                 case "real":
                     tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL);
-                    System.out.println("Tipo certo: "+ tipoVar); 
+                    //System.out.println("Tipo certo: "+ tipoVar); 
                     break;
                 case "logico":
                     tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO);
@@ -78,6 +87,9 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                 }
 
             }
+            
+            
+            
         }
 
         return visitChildren(ctx); 
@@ -88,11 +100,9 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         //Verificando se todos identificadores/parametros que sao chamados no leia existem na tabela
     
         for (var parametro : ctx.identificador()) {
-            
-            for (var identificador : parametro.IDENT()) { 
-                    System.out.println(identificador); 
+            for (var identificador : parametro.IDENT()) {
                     
-                    if(tabela.existe(identificador.getText())==false){
+                    if(tabela.existe(identificador.getText()) == false){
                         String mensagem="identificador " + identificador.getText()  + " nao declarado";
                         try {
                             this.saida.write((String.format("Linha %d: %s\n",  identificador.getSymbol().getLine(), mensagem)).getBytes());
@@ -100,11 +110,31 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                             Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-
-
             }
         }
+        return visitChildren(ctx);
+    }
+    
+    @Override public TipoLA visitCmdescreva(LAParser.CmdescrevaContext ctx) {
+        
+        
         
         return visitChildren(ctx);
     }
+    
+    @Override public TipoLA visitCmdatribuicao(LAParser.CmdatribuicaoContext ctx) {
+        var identificador = ctx.identificador();
+        var expressao = ctx.expressao();
+        
+        var tipoIdentificador = tabela.verificar(identificador.getText());
+        
+        //if (expressao.termo_logico(0).fator_logico(0).parcela_logica(). == "true")
+        //tava tentando fazer o 7 mas morri
+        
+        return visitChildren(ctx);
+    }
+    
+    //o erro da linha 5 é q ele pega linha 8, mas é linha 7
 }
+
+//Linha 21: atribuicao nao compativel para classificacao
