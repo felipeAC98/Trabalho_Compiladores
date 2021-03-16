@@ -91,8 +91,12 @@ public class Principal {
 
             parser.removeErrorListeners();
             parser.addErrorListener(LAEL);
-            parser.programa();       
+            ProgramaContext arvore = parser.programa();
+            Semantico las = new Semantico(saida);
+            las.visitPrograma(arvore);     
         }
+        
+       
         
         saida.write(("Fim da compilacao\n").getBytes());
         
