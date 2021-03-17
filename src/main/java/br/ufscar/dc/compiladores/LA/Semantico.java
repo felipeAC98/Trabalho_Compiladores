@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Semantico extends LABaseVisitor<TipoLA>{
-    TabelaDeSimbolos tabela;
+    public TabelaDeSimbolos tabela;
     FileOutputStream saida;
     
     public Semantico(FileOutputStream saida){
@@ -116,8 +116,9 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     }
     
     @Override public TipoLA visitCmdescreva(LAParser.CmdescrevaContext ctx) {
-        
-        
+        for (var expressao : ctx.expressao()) {
+            LASemanticoUtils.verificarTipo(tabela, expressao);
+        }
         
         return visitChildren(ctx);
     }

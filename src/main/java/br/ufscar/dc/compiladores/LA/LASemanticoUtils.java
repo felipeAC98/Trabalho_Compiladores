@@ -23,6 +23,78 @@ public class LASemanticoUtils {
         errosSemanticos.add(String.format("Erro %d:%d - %s", linha, coluna, mensagem));
     }
     
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_unarioContext parcelaUnario) {
+        
+        if (parcelaUnario.NUM_INT() != null)
+        {
+            System.out.println("texto");
+            return TabelaDeSimbolos.TipoLA.INTEIRO;
+        }
+        else if (parcelaUnario.NUM_REAL() != null)
+        {
+            System.out.println("REAL");
+            return TabelaDeSimbolos.TipoLA.REAL;
+        }
+        else if (parcelaUnario.IDENT() != null)
+        {
+            System.out.println("PIPIPI");
+            return tabela.verificar(parcelaUnario.IDENT().getText());
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        return null; //coloquei só pra buildar mas tá errado!!!
+    }
+    
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.ParcelaContext parcela) {
+        if (parcela.parcela_unario() != null)
+        {
+            return verificarTipo(tabela, parcela.parcela_unario());
+        }
+        return null; //novamente só para buildar
+    }
+    
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.FatorContext fator) {
+        TabelaDeSimbolos.TipoLA ret = null;
+        
+        for(var ta: fator.parcela())
+        {
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            if(ret == null)
+            {
+                ret = aux;
+            }
+            else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
+                adicionarErroSemantico(fator.start, "Expressão " + fator.getText() + " contém tipos incompatíveis");
+                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+            }
+        }
+        return ret;
+    }
+    
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.TermoContext termo) {
+        TabelaDeSimbolos.TipoLA ret = null;
+        
+        for(var ta: termo.fator())
+        {
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            if(ret == null)
+            {
+                ret = aux;
+            }
+            else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
+                adicionarErroSemantico(termo.start, "Expressão " + termo.getText() + " contém tipos incompatíveis");
+                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+            }
+        }
+        return ret;
+    }
+    
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Exp_aritmeticaContext ctx)
     {
         TabelaDeSimbolos.TipoLA ret = null;
@@ -42,6 +114,88 @@ public class LASemanticoUtils {
         
         return ret;
     }
+    
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Exp_relacionalContext exp_relacional) {
+        TabelaDeSimbolos.TipoLA ret = null;
+        
+        for(var ta: exp_relacional.exp_aritmetica())
+        {
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            if(ret == null)
+            {
+                ret = aux;
+            }
+            else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
+                adicionarErroSemantico(exp_relacional.start, "Expressão "+exp_relacional.getText()+ " contém tipos incompatíveis");
+                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+            }
+        }
+        
+        return ret;
+    }
+    
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_logicaContext parcelaLogica) {
+        if (parcelaLogica.exp_relacional() != null) {
+            return verificarTipo(tabela, parcelaLogica.exp_relacional());
+        } else {
+            return TabelaDeSimbolos.TipoLA.LOGICO;
+        }
+    }
+
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Fator_logicoContext fatorLogico) {
+        return verificarTipo(tabela, fatorLogico.parcela_logica());
+    }
+    
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Termo_logicoContext termoLogico) {
+        TabelaDeSimbolos.TipoLA ret = null;
+        for(var ta: termoLogico.fator_logico())
+        {
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            if(ret == null)
+            {
+                ret = aux;
+            }
+            else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
+                adicionarErroSemantico(termoLogico.start, "Expressão "+termoLogico.getText()+ " contém tipos incompatíveis");
+                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+            }
+        }
+        return ret;
+    }
+    
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.ExpressaoContext expressao) {
+        TabelaDeSimbolos.TipoLA ret = null;
+        
+        for(var ta: expressao.termo_logico())
+        {
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            if(ret == null)
+            {
+                ret = aux;
+            }
+            else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
+                adicionarErroSemantico(expressao.start, "Expressão "+expressao.getText()+ " contém tipos incompatíveis");
+                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+            }
+        }
+        return ret;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     /*private static TabelaDeSimbolos.TipoAlguma verificarTipo(TabelaDeSimbolos tabela, LAParser.Exp_aritmeticaContext ctx)
     {
@@ -92,7 +246,9 @@ public class LASemanticoUtils {
     //    return tabela.verificar(nomeVar);
     //}
 
-    private static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.TermoContext ta) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
+    
+    
+    
+    
 }
