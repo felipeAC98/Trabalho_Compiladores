@@ -77,6 +77,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                     //System.out.println("Tipo certo: "+ tipoVar); 
                     break;
                 default:
+                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO);
                     String mensagem="tipo " + tipoVar  + " nao declarado";
                 {
                     try {
@@ -129,6 +130,8 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
         var tipoIdentificador = tabela.verificar(identificador.getText());
         
+        System.out.println( expressao); 
+          
         //if (expressao.termo_logico(0).fator_logico(0).parcela_logica(). == "true")
         //tava tentando fazer o 7 mas morri
         
