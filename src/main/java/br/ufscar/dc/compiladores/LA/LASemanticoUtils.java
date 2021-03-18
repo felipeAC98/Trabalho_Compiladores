@@ -4,8 +4,11 @@
  * and open the template in the editor.
  */
 package br.ufscar.dc.compiladores.LA;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.antlr.v4.runtime.Token;
 
 /**
@@ -20,34 +23,45 @@ public class LASemanticoUtils {
     {
         int linha = t.getLine();
         int coluna = t.getCharPositionInLine();
-        errosSemanticos.add(String.format("Erro %d:%d - %s", linha, coluna, mensagem));
+        errosSemanticos.add(String.format("Linha %d: %s", linha, mensagem));
     }
     
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_unarioContext parcelaUnario) {
-        
+      
         if (parcelaUnario.NUM_INT() != null)
         {
-            System.out.println("texto");
+            //System.out.println("texto");
             return TabelaDeSimbolos.TipoLA.INTEIRO;
         }
         else if (parcelaUnario.NUM_REAL() != null)
         {
-            System.out.println("REAL");
+            //System.out.println("REAL");
             return TabelaDeSimbolos.TipoLA.REAL;
         }
         else if (parcelaUnario.IDENT() != null)
         {
-            System.out.println("PIPIPI");
+            //System.out.println("IDENT");
             return tabela.verificar(parcelaUnario.IDENT().getText());
         }
-        
-        
-        
-        
-        
-        
-        
-        
+        else if (parcelaUnario.identificador() != null)
+        {
+            var identificador=parcelaUnario.identificador();
+            //System.out.println("IDENTIFICADOR");
+            if(tabela.existe(identificador.getText()) == false){
+                String mensagem="identificador " + identificador.getText()  + " nao declarado";
+                adicionarErroSemantico(identificador.start, mensagem);
+            }
+        }
+        else if (parcelaUnario.expressao() != null)
+        {
+            System.out.println("EXPRESSAO");
+            System.out.println(parcelaUnario.expressao());
+            return LASemanticoUtils.verificarTipo(tabela, parcelaUnario.expressao(0));
+        }
+        else{
+            System.out.println(" Parcela unaria nao identificada, retornando null"); 
+        }
+       
         return null; //coloquei só pra buildar mas tá errado!!!
     }
     
@@ -62,9 +76,9 @@ public class LASemanticoUtils {
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.FatorContext fator) {
         TabelaDeSimbolos.TipoLA ret = null;
         
-        for(var ta: fator.parcela())
+        for(var parcela: fator.parcela())
         {
-            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, parcela);
             if(ret == null)
             {
                 ret = aux;
@@ -80,9 +94,9 @@ public class LASemanticoUtils {
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.TermoContext termo) {
         TabelaDeSimbolos.TipoLA ret = null;
         
-        for(var ta: termo.fator())
+        for(var fator: termo.fator())
         {
-            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, fator);
             if(ret == null)
             {
                 ret = aux;
@@ -99,9 +113,9 @@ public class LASemanticoUtils {
     {
         TabelaDeSimbolos.TipoLA ret = null;
         
-        for(var ta: ctx.termo())
+        for(var termo: ctx.termo())
         {
-            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, termo);
             if(ret == null)
             {
                 ret = aux;
@@ -118,9 +132,9 @@ public class LASemanticoUtils {
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Exp_relacionalContext exp_relacional) {
         TabelaDeSimbolos.TipoLA ret = null;
         
-        for(var ta: exp_relacional.exp_aritmetica())
+        for(var expressaoAritimetica: exp_relacional.exp_aritmetica())
         {
-            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, expressaoAritimetica);
             if(ret == null)
             {
                 ret = aux;
@@ -135,6 +149,7 @@ public class LASemanticoUtils {
     }
     
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_logicaContext parcelaLogica) {
+ 
         if (parcelaLogica.exp_relacional() != null) {
             return verificarTipo(tabela, parcelaLogica.exp_relacional());
         } else {
@@ -148,9 +163,9 @@ public class LASemanticoUtils {
     
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Termo_logicoContext termoLogico) {
         TabelaDeSimbolos.TipoLA ret = null;
-        for(var ta: termoLogico.fator_logico())
+        for(var fatorLogico: termoLogico.fator_logico())
         {
-            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, fatorLogico);
             if(ret == null)
             {
                 ret = aux;
@@ -163,12 +178,13 @@ public class LASemanticoUtils {
         return ret;
     }
     
+    //Quando o tipo estiver dentro de uma expressao, devera ser verificado aqui
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.ExpressaoContext expressao) {
         TabelaDeSimbolos.TipoLA ret = null;
-        
-        for(var ta: expressao.termo_logico())
+        for(var termoLogico: expressao.termo_logico())
         {
-            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, ta);
+
+            TabelaDeSimbolos.TipoLA aux = verificarTipo(tabela, termoLogico);
             if(ret == null)
             {
                 ret = aux;

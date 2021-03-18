@@ -28,6 +28,7 @@ package br.ufscar.dc.compiladores.LA;
 import br.ufscar.dc.compiladores.LA.LAParser.ProgramaContext;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -96,7 +97,12 @@ public class Principal {
             las.visitPrograma(arvore);     
         }
         
-       
+        //Escrevendo os erros gravados no LASemanticoUtils para um arquivo
+        List<String> errosSemanticos = LASemanticoUtils.errosSemanticos;
+        
+        for (var erroSemantico : errosSemanticos) {
+            saida.write((erroSemantico + "\n").getBytes());
+        }   
         
         saida.write(("Fim da compilacao\n").getBytes());
         saida.close(); //fecha o ponteiro do arquivo de saída
