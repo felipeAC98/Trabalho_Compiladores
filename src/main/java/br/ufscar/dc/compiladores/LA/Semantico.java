@@ -127,10 +127,11 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         var identificador = ctx.identificador();
         var expressao = ctx.expressao();
          
-        var tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
-        
+        TipoLA tipoIdentificador=tabela.verificar(identificador.getText());
+        TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
+
         //Se o tipo for invalido ira anotar oerro
-        if(tipoExpressao==TabelaDeSimbolos.TipoLA.INVALIDO){
+        if(tipoExpressao==TabelaDeSimbolos.TipoLA.INVALIDO || tipoIdentificador!=tipoExpressao){
            LASemanticoUtils.adicionarErroSemantico(identificador.start, "atribuicao nao compativel para " + identificador.getText());
         }
         

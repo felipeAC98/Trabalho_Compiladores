@@ -194,6 +194,9 @@ public class LASemanticoUtils {
             {
                 ret = aux;
             }
+            else if(termoLogico.op_logico_2()!=null){
+                ret = TabelaDeSimbolos.TipoLA.LOGICO;
+            }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
                 if(termoLogico.op_logico_2()==null){
                     //adicionarErroSemantico(termoLogico.start, "Expressão "+termoLogico.getText()+ " contém tipos incompatíveis");
