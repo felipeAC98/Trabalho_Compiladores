@@ -120,20 +120,19 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         for (var expressao : ctx.expressao()) {
             LASemanticoUtils.verificarTipo(tabela, expressao);
         }
-        
         return visitChildren(ctx);
     }
     
     @Override public TipoLA visitCmdatribuicao(LAParser.CmdatribuicaoContext ctx) {
         var identificador = ctx.identificador();
         var expressao = ctx.expressao();
+         
+        var tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
         
-        var tipoIdentificador = tabela.verificar(identificador.getText());
-        
-        System.out.println( expressao); 
-          
-        //if (expressao.termo_logico(0).fator_logico(0).parcela_logica(). == "true")
-        //tava tentando fazer o 7 mas morri
+        //Se o tipo for invalido ira anotar oerro
+        if(tipoExpressao==TabelaDeSimbolos.TipoLA.INVALIDO){
+           LASemanticoUtils.adicionarErroSemantico(identificador.start, "atribuicao nao compativel para " + identificador.getText());
+        }
         
         return visitChildren(ctx);
     }

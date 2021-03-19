@@ -26,11 +26,19 @@ public class LASemanticoUtils {
         errosSemanticos.add(String.format("Linha %d: %s", linha, mensagem));
     }
     
+    public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_nao_unarioContext parcelaNaoUnario) {
+     
+        if (parcelaNaoUnario.CADEIA() != null){
+            //System.out.println("CADEIA");
+            return TabelaDeSimbolos.TipoLA.LITERAL;
+        }
+        return null;
+    }
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_unarioContext parcelaUnario) {
       
         if (parcelaUnario.NUM_INT() != null)
         {
-            //System.out.println("texto");
+            //System.out.println("INTEIRO");
             return TabelaDeSimbolos.TipoLA.INTEIRO;
         }
         else if (parcelaUnario.NUM_REAL() != null)
@@ -45,32 +53,41 @@ public class LASemanticoUtils {
         }
         else if (parcelaUnario.identificador() != null)
         {
-            var identificador=parcelaUnario.identificador();
             //System.out.println("IDENTIFICADOR");
+            var identificador=parcelaUnario.identificador();
             if(tabela.existe(identificador.getText()) == false){
                 String mensagem="identificador " + identificador.getText()  + " nao declarado";
                 adicionarErroSemantico(identificador.start, mensagem);
+                return TabelaDeSimbolos.TipoLA.INVALIDO;
+            }
+            else{
+                TabelaDeSimbolos.TipoLA tipoIdentificador = tabela.verificar(identificador.getText());
+                return tipoIdentificador;
             }
         }
         else if (parcelaUnario.expressao() != null)
         {
-            System.out.println("EXPRESSAO");
-            System.out.println(parcelaUnario.expressao());
+            //System.out.println("EXPRESSAO");
             return LASemanticoUtils.verificarTipo(tabela, parcelaUnario.expressao(0));
         }
         else{
             System.out.println(" Parcela unaria nao identificada, retornando null"); 
+            return TabelaDeSimbolos.TipoLA.LITERAL; //coloquei só pra buildar mas tá errado!!!
+        
         }
        
-        return null; //coloquei só pra buildar mas tá errado!!!
     }
     
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.ParcelaContext parcela) {
-        if (parcela.parcela_unario() != null)
-        {
+        TabelaDeSimbolos.TipoLA ret = null;
+        
+        if (parcela.parcela_unario() != null) {
             return verificarTipo(tabela, parcela.parcela_unario());
+        } else if (parcela.parcela_nao_unario() != null) {
+            return verificarTipo(tabela, parcela.parcela_nao_unario());
         }
-        return null; //novamente só para buildar
+        return ret;
+
     }
     
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.FatorContext fator) {
@@ -84,7 +101,7 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                adicionarErroSemantico(fator.start, "Expressão " + fator.getText() + " contém tipos incompatíveis");
+                //adicionarErroSemantico(fator.start, "Expressão " + fator.getText() + " contém tipos incompatíveis");
                 ret = TabelaDeSimbolos.TipoLA.INVALIDO;
             }
         }
@@ -101,9 +118,14 @@ public class LASemanticoUtils {
             {
                 ret = aux;
             }
-            else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                adicionarErroSemantico(termo.start, "Expressão " + termo.getText() + " contém tipos incompatíveis");
-                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+            else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){                
+                if(ret == TabelaDeSimbolos.TipoLA.INTEIRO || ret == TabelaDeSimbolos.TipoLA.REAL){
+                    //ignora
+                }
+                else{
+                    adicionarErroSemantico(termo.start, "Expressão " + termo.getText() + " contém tipos incompatíveis");
+                    ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+                }
             }
         }
         return ret;
@@ -121,7 +143,7 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                adicionarErroSemantico(ctx.start, "Expressão "+ctx.getText()+ " contém tipos incompatíveis");
+                //adicionarErroSemantico(ctx.start, "Expressão "+ctx.getText()+ " contém tipos incompatíveis");
                 ret = TabelaDeSimbolos.TipoLA.INVALIDO;
             }
         }
@@ -140,7 +162,7 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                adicionarErroSemantico(exp_relacional.start, "Expressão "+exp_relacional.getText()+ " contém tipos incompatíveis");
+                //adicionarErroSemantico(exp_relacional.start, "Expressão "+exp_relacional.getText()+ " contém tipos incompatíveis");
                 ret = TabelaDeSimbolos.TipoLA.INVALIDO;
             }
         }
@@ -171,7 +193,7 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                adicionarErroSemantico(termoLogico.start, "Expressão "+termoLogico.getText()+ " contém tipos incompatíveis");
+                //adicionarErroSemantico(termoLogico.start, "Expressão "+termoLogico.getText()+ " contém tipos incompatíveis");
                 ret = TabelaDeSimbolos.TipoLA.INVALIDO;
             }
         }
@@ -190,7 +212,7 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                adicionarErroSemantico(expressao.start, "Expressão "+expressao.getText()+ " contém tipos incompatíveis");
+                //adicionarErroSemantico(expressao.start, "Expressão "+expressao.getText()+ " contém tipos incompatíveis");
                 ret = TabelaDeSimbolos.TipoLA.INVALIDO;
             }
         }
