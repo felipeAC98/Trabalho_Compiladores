@@ -123,7 +123,7 @@ public class LASemanticoUtils {
                     //ignora
                 }
                 else{
-                    adicionarErroSemantico(termo.start, "Expressão " + termo.getText() + " contém tipos incompatíveis");
+                    //adicionarErroSemantico(termo.start, "Expressão " + termo.getText() + " contém tipos incompatíveis");
                     ret = TabelaDeSimbolos.TipoLA.INVALIDO;
                 }
             }
@@ -162,8 +162,10 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                //adicionarErroSemantico(exp_relacional.start, "Expressão "+exp_relacional.getText()+ " contém tipos incompatíveis");
-                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+                if(exp_relacional.op_relacional()==null){
+                    adicionarErroSemantico(exp_relacional.start, "Expressão 1"+exp_relacional.getText()+ " contém tipos incompatíveis");
+                    ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+                }
             }
         }
         
@@ -193,8 +195,10 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                //adicionarErroSemantico(termoLogico.start, "Expressão "+termoLogico.getText()+ " contém tipos incompatíveis");
-                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+                if(termoLogico.op_logico_2()==null){
+                    //adicionarErroSemantico(termoLogico.start, "Expressão "+termoLogico.getText()+ " contém tipos incompatíveis");
+                    ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+                }
             }
         }
         return ret;
@@ -212,8 +216,10 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
-                //adicionarErroSemantico(expressao.start, "Expressão "+expressao.getText()+ " contém tipos incompatíveis");
-                ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+                if(expressao.op_logico_1()==null){
+                    //adicionarErroSemantico(expressao.start, "Expressão 3"+expressao.getText()+ " contém tipos incompatíveis");
+                    ret = TabelaDeSimbolos.TipoLA.INVALIDO;
+                }
             }
         }
         return ret;

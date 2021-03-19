@@ -52,7 +52,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                 
                 String mensagem="identificador " + nomeVar  + " ja declarado anteriormente";
                 try {
-                    this.saida.write((String.format("Linha %d: %s\n",  ctx.tipo().start.getLine(), mensagem)).getBytes());
+                    this.saida.write((String.format("Linha %d: %s\n",  parametro.start.getLine(), mensagem)).getBytes());
                 } catch (IOException ex) {
                     Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
                 }
