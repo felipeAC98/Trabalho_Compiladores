@@ -130,6 +130,13 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         TipoLA tipoIdentificador=tabela.verificar(identificador.getText());
         TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
 
+        //Nao devemos ter erros quando o identificador for real e a expressao inteiro ou viceversa
+        if(tipoExpressao==TabelaDeSimbolos.TipoLA.REAL || tipoExpressao==TabelaDeSimbolos.TipoLA.INTEIRO){
+            if(tipoIdentificador==TabelaDeSimbolos.TipoLA.REAL || tipoIdentificador==TabelaDeSimbolos.TipoLA.INTEIRO){
+                tipoExpressao=tipoIdentificador;
+            }
+        }
+        
         //Se o tipo for invalido ira anotar oerro
         if(tipoExpressao==TabelaDeSimbolos.TipoLA.INVALIDO || tipoIdentificador!=tipoExpressao){
            LASemanticoUtils.adicionarErroSemantico(identificador.start, "atribuicao nao compativel para " + identificador.getText());

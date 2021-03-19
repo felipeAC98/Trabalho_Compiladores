@@ -26,6 +26,7 @@ public class LASemanticoUtils {
         errosSemanticos.add(String.format("Linha %d: %s", linha, mensagem));
     }
     
+    //Definindo os tipos de expressoes nao unarias
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_nao_unarioContext parcelaNaoUnario) {
      
         if (parcelaNaoUnario.CADEIA() != null){
@@ -34,6 +35,8 @@ public class LASemanticoUtils {
         }
         return null;
     }
+    
+    //O objetivo final aqui eh classificar os tipos de cada um dos individuos dentro de uma expressao, isso para um caso unario
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_unarioContext parcelaUnario) {
       
         if (parcelaUnario.NUM_INT() != null)
@@ -55,6 +58,8 @@ public class LASemanticoUtils {
         {
             //System.out.println("IDENTIFICADOR");
             var identificador=parcelaUnario.identificador();
+            
+            //Verificando se o identificador ja esta na tabela (foi definido) antes de prosseguir com a tipagem dos elementos
             if(tabela.existe(identificador.getText()) == false){
                 String mensagem="identificador " + identificador.getText()  + " nao declarado";
                 adicionarErroSemantico(identificador.start, mensagem);
@@ -120,7 +125,7 @@ public class LASemanticoUtils {
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){                
                 if(ret == TabelaDeSimbolos.TipoLA.INTEIRO || ret == TabelaDeSimbolos.TipoLA.REAL){
-                    //ignora
+                    //A aritmetica entre inteiro e real deve ser realizada sem erros
                 }
                 else{
                     //adicionarErroSemantico(termo.start, "Expressão " + termo.getText() + " contém tipos incompatíveis");
@@ -162,8 +167,10 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
+                //Evitando que termos logicos entre numeros sejam reconhecidos como erros
+                
                 if(exp_relacional.op_relacional()==null){
-                    adicionarErroSemantico(exp_relacional.start, "Expressão 1"+exp_relacional.getText()+ " contém tipos incompatíveis");
+                    //adicionarErroSemantico(exp_relacional.start, "Expressão "+exp_relacional.getText()+ " contém tipos incompatíveis");
                     ret = TabelaDeSimbolos.TipoLA.INVALIDO;
                 }
             }
@@ -198,6 +205,7 @@ public class LASemanticoUtils {
                 ret = TabelaDeSimbolos.TipoLA.LOGICO;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
+                //Evitando que termos logicos entre numeros sejam reconhecidos como erros
                 if(termoLogico.op_logico_2()==null){
                     //adicionarErroSemantico(termoLogico.start, "Expressão "+termoLogico.getText()+ " contém tipos incompatíveis");
                     ret = TabelaDeSimbolos.TipoLA.INVALIDO;
@@ -219,6 +227,7 @@ public class LASemanticoUtils {
                 ret = aux;
             }
             else if (ret != aux && aux != TabelaDeSimbolos.TipoLA.INVALIDO){
+                //Evitando que termos logicos entre numeros sejam reconhecidos como erros
                 if(expressao.op_logico_1()==null){
                     //adicionarErroSemantico(expressao.start, "Expressão 3"+expressao.getText()+ " contém tipos incompatíveis");
                     ret = TabelaDeSimbolos.TipoLA.INVALIDO;
