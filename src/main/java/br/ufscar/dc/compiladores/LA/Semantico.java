@@ -145,6 +145,13 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         return visitChildren(ctx);
     }
     
+    @Override public TipoLA visitCmdenquanto(LAParser.CmdenquantoContext ctx) { 
+       
+        TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, ctx.expressao());
+        
+        return visitChildren(ctx); 
+    }
+    
     //o erro da linha 5 é q ele pega linha 8, mas é linha 7
 }
 
