@@ -33,7 +33,21 @@ public class LASemanticoUtils {
             //System.out.println("CADEIA");
             return TabelaDeSimbolos.TipoLA.LITERAL;
         }
-        return null;
+        else{
+            //System.out.println("IDENTIFICADOR");
+            var identificador= parcelaNaoUnario.identificador();
+            
+            //Verificando se o identificador ja esta na tabela (foi definido) antes de prosseguir com a tipagem dos elementos
+            if(tabela.existe(identificador.getText()) == false){
+                String mensagem="identificador " + identificador.getText()  + " nao declarado";
+                adicionarErroSemantico(identificador.start, mensagem);
+                return TabelaDeSimbolos.TipoLA.INVALIDO;
+            }
+            else{
+                TabelaDeSimbolos.TipoLA tipoIdentificador = tabela.verificar(identificador.getText());
+                return tipoIdentificador;
+            }
+        }
     }
     
     //O objetivo final aqui eh classificar os tipos de cada um dos individuos dentro de uma expressao, isso para um caso unario

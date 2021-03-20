@@ -37,7 +37,10 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     }
     @Override public TipoLA visitVariavel(LAParser.VariavelContext ctx) {
         
-        String tipoVar=ctx.tipo().getText();
+        
+        String tipoVar=ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
+        
+        Boolean tipoP = ctx.tipo().tipo_estendido().pont!= null;
 
         /*if(tipoVar!="literal" && tipoVar!="inteiro" && tipoVar!="real" && tipoVar!="logico"){
           System.out.println("Tipo errado: "+ tipoVar);    
@@ -58,39 +61,40 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                 }
             }
             
-        //Verificando se o simbolo foi digitado corretamente
-            switch(tipoVar) {
+            TipoLA tipoVarLA;
+            
+            switch(tipoVar) {               //Verificando se o simbolo foi digitado corretamente
+
                 case "literal":
-                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL);
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
+                    //tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL);
                     //System.out.println("Tipo certo: "+ tipoVar); 
                     break;
                 case "inteiro":
-                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INTEIRO);
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INTEIRO;
                     //System.out.println("Tipo certo: "+ tipoVar); 
                     break;
                 case "real":
-                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL);
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL;
                     //System.out.println("Tipo certo: "+ tipoVar); 
                     break;
                 case "logico":
-                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO);
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO;
                     //System.out.println("Tipo certo: "+ tipoVar); 
                     break;
                 default:
-                    tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO);
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
                     String mensagem="tipo " + tipoVar  + " nao declarado";
-                {
-                    try {
-                        this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
-                    } catch (IOException ex) {
-                        Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                    {
+                        try {
+                            this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
+                        } catch (IOException ex) {
+                            Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
-                }
 
             }
-            
-            
-            
+            tabela.adicionar(nomeVar, tipoVarLA, tipoP);  
         }
 
         return visitChildren(ctx); 
@@ -139,7 +143,12 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
         //Se o tipo for invalido ira anotar oerro
         if(tipoExpressao==TabelaDeSimbolos.TipoLA.INVALIDO || tipoIdentificador!=tipoExpressao){
-           LASemanticoUtils.adicionarErroSemantico(identificador.start, "atribuicao nao compativel para " + identificador.getText());
+           if(tabela.verificarPonteiro(identificador.getText())){
+                LASemanticoUtils.adicionarErroSemantico(identificador.start, "atribuicao nao compativel para ^" + identificador.getText());
+           }
+           else{
+                LASemanticoUtils.adicionarErroSemantico(identificador.start, "atribuicao nao compativel para " + identificador.getText());
+           }
         }
         
         return visitChildren(ctx);

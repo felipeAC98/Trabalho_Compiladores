@@ -100,7 +100,7 @@ tipo_basico: 'literal' | 'inteiro' | 'real' | 'logico';
 
 tipo_basico_ident: tipo_basico | IDENT;
 
-tipo_estendido: ('^')? tipo_basico_ident;
+tipo_estendido: (pont='^')? tipo_basico_ident;
 
 valor_constante: CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso';
 
@@ -118,14 +118,14 @@ corpo: (declaracao_local)* (cmd)*;
 cmd: cmdleia | cmdescreva | cmdse | cmdcaso | cmdpara | cmdenquanto
      | cmdfaca | cmdatribuicao | cmdchamada | cmdretorne;
 
-cmdleia: 'leia' '(' ('^')? identificador (',' ('^')? identificador)* ')';
+cmdleia: 'leia' '(' (pont='^')? identificador (',' (pont='^')? identificador)* ')';
 cmdescreva: 'escreva' '(' expressao (',' expressao)* ')';
 cmdse: 'se' expressao 'entao' (cmd)* ('senao' (cmd)*)? 'fim_se';
 cmdcaso: 'caso' exp_aritmetica 'seja' selecao ('senao' (cmd)*)? 'fim_caso';
 cmdpara: 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' (cmd)* 'fim_para';
 cmdenquanto: 'enquanto' expressao 'faca' (cmd)* 'fim_enquanto';
 cmdfaca: 'faca' (cmd)* 'ate' expressao;
-cmdatribuicao: ('^')? identificador '<-' expressao;
+cmdatribuicao: (pont='^')? identificador '<-' expressao;
 cmdchamada: IDENT '(' expressao (',' expressao)* ')';
 cmdretorne: 'retorne' expressao;
 
@@ -147,7 +147,7 @@ op2: '*' | '/';
 op3: '%';
 
 parcela: (op_unario)? parcela_unario | parcela_nao_unario;
-parcela_unario: ('^')? identificador
+parcela_unario: (pont='^')? identificador
                 | IDENT '(' expressao (',' expressao)* ')'
                 | NUM_INT
                 | NUM_REAL

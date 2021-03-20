@@ -23,11 +23,19 @@ public class TabelaDeSimbolos {
     class EntradaTabelaDeSimbolos{
         String nome;
         TipoLA tipo;
+        Boolean ponteiro;
         
         private EntradaTabelaDeSimbolos(String nome, TipoLA tipo)
         {
             this.nome = nome;
             this.tipo = tipo;
+            this.ponteiro = false;
+        }
+        private EntradaTabelaDeSimbolos(String nome, TipoLA tipo, Boolean ponteiro)
+        {
+            this.nome = nome;
+            this.tipo = tipo;
+            this.ponteiro = ponteiro;
         }
     }
     private final Map<String, EntradaTabelaDeSimbolos> tabela;
@@ -40,6 +48,10 @@ public class TabelaDeSimbolos {
     {
         tabela.put(nome, new EntradaTabelaDeSimbolos(nome, tipo));
     }
+    public void adicionar(String nome, TipoLA tipo, Boolean ponteiro)
+    {
+        tabela.put(nome, new EntradaTabelaDeSimbolos(nome, tipo, ponteiro));
+    }
     public boolean existe(String nome)
     {
         return tabela.containsKey(nome);
@@ -47,5 +59,9 @@ public class TabelaDeSimbolos {
     public TipoLA verificar(String nome)
     {
         return tabela.get(nome).tipo;
+    }
+    public Boolean verificarPonteiro(String nome)
+    {
+        return tabela.get(nome).ponteiro;
     }
 }
