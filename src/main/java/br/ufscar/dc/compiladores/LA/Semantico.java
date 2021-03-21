@@ -1,5 +1,6 @@
 package br.ufscar.dc.compiladores.LA;
 
+import static br.ufscar.dc.compiladores.LA.LASemanticoUtils.adicionarErroSemantico;
 import br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,15 +26,43 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         return visitChildren(ctx);
     }
     
-    @Override
-    public TipoLA visitDeclaracao_local(LAParser.Declaracao_localContext ctx) { 
-             
-        return visitChildren(ctx); 
-    }
-    
     @Override public TipoLA visitExpressao(LAParser.ExpressaoContext ctx) {
 
         return visitChildren(ctx); 
+    }
+    
+    @Override public TipoLA visitDeclaracao_local(LAParser.Declaracao_localContext ctx) { 
+        
+        //Se for somente uma definicao de tipo, devera entrar aqui para criar a subtabela do registro em questao
+        if (ctx.tipo()!=null &&  ctx.tipo().registro()!=null){
+
+                //salvando os valores anteriores da tabela
+                TabelaDeSimbolos tabelaSimbolosOriginal=tabela;
+
+                //A ideia aqui eh criar uma 
+                tabela= new TabelaDeSimbolos();
+
+                TipoLA retornoFilho= visitChildren(ctx); 
+
+                //neste momento "tabela" possui somente as variaveis da estrutura
+                TabelaDeSimbolos tabelaRegistro=tabela;
+
+                tabela=tabelaSimbolosOriginal;
+
+                //inserindo as tabelas de cada registro na tabela geral
+                String nomeVar=ctx.IDENT().getText();
+                //System.out.println("nomeVar: "+ nomeVar);
+                Boolean tipoP = false;
+                tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO, tipoP, tabelaRegistro );
+
+                //apos visitar o filho, a tabela devera ter somente as variaveis referentes a este registro
+                return retornoFilho;
+
+            }
+        
+        else{
+            return visitChildren(ctx);
+        }
     }
     
     @Override public TipoLA visitVariavel(LAParser.VariavelContext ctx) {
@@ -46,8 +75,9 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             //A ideia aqui eh criar uma 
             tabela= new TabelaDeSimbolos();
 
+            //Entrando na criacao da subtabela            
             TipoLA retornoFilho= visitChildren(ctx); 
-            
+                                   
             //neste momento "tabela" possui somente as variaveis da estrutura
             TabelaDeSimbolos tabelaRegistro=tabela;
             
@@ -60,17 +90,19 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                 Boolean tipoP = false;
                 tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO, tipoP, tabelaRegistro ); 
             }
+           
+            
             //apos visitar o filho, a tabela devera ter somente as variaveis referentes a este registro
             return retornoFilho;
  
         }
         
+        //Quando for uma variavel do tipo de um registro, essa variavel vai ser alterada posteriormente
+        TabelaDeSimbolos tipoRegistro=null;
+                
         String tipoVar=ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
         
         Boolean tipoP = ctx.tipo().tipo_estendido().pont != null;
-        /*if(tipoVar!="literal" && tipoVar!="inteiro" && tipoVar!="real" && tipoVar!="logico"){
-          System.out.println("Tipo errado: "+ tipoVar);    
-        }*/
         
         //Andando em todas variaveis de um identificador
          for (var parametro : ctx.identificador()) { 
@@ -107,18 +139,26 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                     //System.out.println("Tipo certo: "+ tipoVar); 
                     break;
                 default:
-                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
-                    String mensagem="tipo " + tipoVar  + " nao declarado";
-                    {
-                        try {
-                            this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
-                        } catch (IOException ex) {
-                            Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                    //verificando se existe um registro deste tipo
+                    if(tabela.existe(tipoVar) == true){
+                        tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO;
+                        tipoRegistro = tabela.obtemTabelaRegistro(tipoVar);
+                    }
+                    else{
+                        //System.out.println("Tipo errado: "+ tipoVar);
+                        tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
+                        String mensagem="tipo " + tipoVar  + " nao declarado";
+                        {
+                            try {
+                                this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
+                            } catch (IOException ex) {
+                                Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
                     }
 
             }
-            tabela.adicionar(nomeVar, tipoVarLA, tipoP);  
+            tabela.adicionar(nomeVar, tipoVarLA, tipoP,tipoRegistro);  
         }
 
         return visitChildren(ctx); 
@@ -152,22 +192,12 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     @Override public TipoLA visitCmdatribuicao(LAParser.CmdatribuicaoContext ctx) {
         var identificador = ctx.identificador();
         var expressao = ctx.expressao();
-        System.out.println(identificador.IDENT(0).getText()); 
+        //System.out.println(identificador.IDENT(0).getText());         
         
-        Boolean registro;
-        
-        //Se tiver o reg ('.') entao eh um registro
-        if(identificador.reg!=null){
-            registro=true;
-        }
-        else{
-            registro=false;
-        }
-        
-        TipoLA tipoIdentificador=tabela.verificar(identificador,registro);
+        TipoLA tipoIdentificador=tabela.verificar(identificador);
         TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
 
-        System.out.println(tipoIdentificador);
+        //System.out.println(tipoIdentificador);
 
         //Nao devemos ter erros quando o identificador for real e a expressao inteiro ou viceversa
         if(tipoExpressao==TabelaDeSimbolos.TipoLA.REAL || tipoExpressao==TabelaDeSimbolos.TipoLA.INTEIRO){
@@ -178,7 +208,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
         //Se o tipo for invalido ira anotar oerro
         if(tipoExpressao==TabelaDeSimbolos.TipoLA.INVALIDO || tipoIdentificador!=tipoExpressao){
-           if(tabela.verificarPonteiro(identificador, registro)){
+           if(tabela.verificarPonteiro(identificador)){
                 LASemanticoUtils.adicionarErroSemantico(identificador.start, "atribuicao nao compativel para ^" + identificador.getText());
            }
            else{

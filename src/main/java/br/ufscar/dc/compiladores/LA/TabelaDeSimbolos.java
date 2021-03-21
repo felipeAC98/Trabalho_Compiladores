@@ -86,9 +86,15 @@ public class TabelaDeSimbolos {
             return tabela.containsKey(identificador.getText());  
         }
         else{
-            //NAO FUNCIONA CASO FOR UMA ESTRURA DE UMA ESTRUTURA
-           TabelaDeSimbolos tabelaRegistro=obtemTabelaRegistro(identificador.IDENT(0).getText());
-           return tabelaRegistro.existe(identificador.IDENT(1).getText());
+            //verificando se existe o registro na tabela, caso nao ja retorna falso
+           if(tabela.get(identificador.IDENT(0).getText())!=null){
+               //NAO FUNCIONA CASO FOR UMA ESTRURA DE UMA ESTRUTURA
+                TabelaDeSimbolos tabelaRegistro=obtemTabelaRegistro(identificador.IDENT(0).getText());
+                return tabelaRegistro.existe(identificador.IDENT(1).getText());
+           }
+           else{
+               return false;
+           }
                       
         }
     }
@@ -96,9 +102,9 @@ public class TabelaDeSimbolos {
     {
         return tabela.get(nome).tipo;
     }
-    public TipoLA verificar(LAParser.IdentificadorContext identificador, Boolean registro)
+    public TipoLA verificar(LAParser.IdentificadorContext identificador)
     {
-       if(registro==false){
+       if(identificador.reg==null){
             return tabela.get(identificador.getText()).tipo;
        }
        else{
@@ -120,9 +126,9 @@ public class TabelaDeSimbolos {
         return tabela.get(nome).ponteiro;
     }
     
-    public Boolean verificarPonteiro(LAParser.IdentificadorContext identificador, Boolean registro)
+    public Boolean verificarPonteiro(LAParser.IdentificadorContext identificador)
     {
-       if(registro==false){
+       if(identificador.reg==null){
              return tabela.get(identificador.getText()).ponteiro;
        }
        else{

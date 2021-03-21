@@ -74,13 +74,14 @@ public class LASemanticoUtils {
             var identificador=parcelaUnario.identificador();
             
             //Verificando se o identificador ja esta na tabela (foi definido) antes de prosseguir com a tipagem dos elementos
-            if(tabela.existe(identificador.getText()) == false){
+            if(tabela.existe(parcelaUnario.identificador()) == false){
                 String mensagem="identificador " + identificador.getText()  + " nao declarado";
                 adicionarErroSemantico(identificador.start, mensagem);
                 return TabelaDeSimbolos.TipoLA.INVALIDO;
             }
             else{
-                TabelaDeSimbolos.TipoLA tipoIdentificador = tabela.verificar(identificador.getText());
+
+                TabelaDeSimbolos.TipoLA tipoIdentificador = tabela.verificar(identificador);
                 return tipoIdentificador;
             }
         }
