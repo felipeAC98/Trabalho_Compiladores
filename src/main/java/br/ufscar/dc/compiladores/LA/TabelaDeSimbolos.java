@@ -18,7 +18,8 @@ public class TabelaDeSimbolos {
         LITERAL,
         REAL,
         LOGICO,
-        INVALIDO
+        INVALIDO,
+        REGISTRO
     }
     class EntradaTabelaDeSimbolos{
         String nome;
@@ -39,10 +40,12 @@ public class TabelaDeSimbolos {
         }
     }
     private final Map<String, EntradaTabelaDeSimbolos> tabela;
+    private final Map<String, String> tabelaDeRegistros;
     
     public TabelaDeSimbolos()
     {
         this.tabela = new HashMap<>();
+        this.tabelaDeRegistros = new HashMap<>();
     }
     public void adicionar(String nome, TipoLA tipo)
     {
@@ -64,4 +67,18 @@ public class TabelaDeSimbolos {
     {
         return tabela.get(nome).ponteiro;
     }
+    
+    public void adicionarRegistro(String nome, String tipoRegistro)
+    {
+        tabelaDeRegistros.put(nome, tipoRegistro);
+    }
+    public boolean existeRegistro(String nome)
+    {
+        return tabelaDeRegistros.containsKey(nome);
+    }
+    //public TipoLA verificarRegistro(String nome)
+    //{
+        //return tabelaDeRegistros.get(nome).;
+        //como retornar o tipo do registro?
+    //}
 }

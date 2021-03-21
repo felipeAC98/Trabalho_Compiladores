@@ -35,24 +35,77 @@ public class Semantico extends LABaseVisitor<TipoLA>{
 
         return visitChildren(ctx); 
     }
-    @Override public TipoLA visitVariavel(LAParser.VariavelContext ctx) {
-        
-        
+    @Override public TipoLA visitRegistro(LAParser.ExpressaoContext ctx)
+    {
         String tipoVar=ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
         
-        Boolean tipoP = ctx.tipo().tipo_estendido().pont!= null;
-
+        Boolean tipoP = ctx.tipo().tipo_estendido().pont != null;
         /*if(tipoVar!="literal" && tipoVar!="inteiro" && tipoVar!="real" && tipoVar!="logico"){
           System.out.println("Tipo errado: "+ tipoVar);    
         }*/
         
         //Andando em todas variaveis de um identificador
          for (var parametro : ctx.identificador()) { 
-             
             String nomeVar=parametro.getText();
-            
             if(tabela.existe(nomeVar) == true){
-                
+                String mensagem="identificador " + nomeVar  + " ja declarado anteriormente";
+                try {
+                    this.saida.write((String.format("Linha %d: %s\n",  parametro.start.getLine(), mensagem)).getBytes());
+                } catch (IOException ex) {
+                    Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+            TipoLA tipoVarLA;
+            
+            switch(tipoVar) {               //Verificando se o simbolo foi digitado corretamente
+
+                case "literal":
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
+                    //tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL);
+                    //System.out.println("Tipo certo: "+ tipoVar); 
+                    break;
+                case "inteiro":
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INTEIRO;
+                    //System.out.println("Tipo certo: "+ tipoVar); 
+                    break;
+                case "real":
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL;
+                    //System.out.println("Tipo certo: "+ tipoVar); 
+                    break;
+                case "logico":
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO;
+                    //System.out.println("Tipo certo: "+ tipoVar); 
+                    break;
+                default:
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
+                    String mensagem="tipo " + tipoVar  + " nao declarado";
+                    {
+                        try {
+                            this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
+                        } catch (IOException ex) {
+                            Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+
+            }
+            tabela.adicionar(nomeVar, tipoVarLA, tipoP);  
+        }
+
+        return visitChildren(ctx); 
+    }
+    @Override public TipoLA visitVariavel(LAParser.VariavelContext ctx) {
+        String tipoVar=ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
+        
+        Boolean tipoP = ctx.tipo().tipo_estendido().pont != null;
+        /*if(tipoVar!="literal" && tipoVar!="inteiro" && tipoVar!="real" && tipoVar!="logico"){
+          System.out.println("Tipo errado: "+ tipoVar);    
+        }*/
+        
+        //Andando em todas variaveis de um identificador
+         for (var parametro : ctx.identificador()) { 
+            String nomeVar=parametro.getText();
+            if(tabela.existe(nomeVar) == true){
                 String mensagem="identificador " + nomeVar  + " ja declarado anteriormente";
                 try {
                     this.saida.write((String.format("Linha %d: %s\n",  parametro.start.getLine(), mensagem)).getBytes());
@@ -160,8 +213,10 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
         return visitChildren(ctx); 
     }
-    
-    //o erro da linha 5 é q ele pega linha 8, mas é linha 7
 }
 
 //Linha 21: atribuicao nao compativel para classificacao
+
+//15
+//Linha 49: comando retorne nao permitido nesse escopo
+//Fim da compilacao
