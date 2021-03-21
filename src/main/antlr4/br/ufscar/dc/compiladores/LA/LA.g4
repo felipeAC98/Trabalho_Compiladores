@@ -90,7 +90,7 @@ declaracao_local:  'declare' variavel
 
 variavel: identificador (',' identificador)* ':' tipo;
 
-identificador: IDENT ('.' IDENT)* dimensao;
+identificador: IDENT (reg='.' IDENT)* dimensao;
 
 dimensao: ('[' exp_aritmetica ']')*;
 
