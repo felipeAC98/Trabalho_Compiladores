@@ -80,7 +80,6 @@ public class LASemanticoUtils {
                 return TabelaDeSimbolos.TipoLA.INVALIDO;
             }
             else{
-
                 TabelaDeSimbolos.TipoLA tipoIdentificador = tabela.verificar(identificador);
                 return tipoIdentificador;
             }

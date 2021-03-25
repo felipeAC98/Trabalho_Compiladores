@@ -75,15 +75,25 @@ public class TabelaDeSimbolos {
     }
     public boolean existe(String nome)
     {
-
         return tabela.containsKey(nome);
 
     }
     
     public boolean existe(LAParser.IdentificadorContext identificador)
     {
+        String nomeVar;
+                
+        //Gambiarra brabissima para ver se o vetor ja foi definido
+        if(identificador.dimensao().exp_aritmetica(0)!=null){
+            nomeVar=identificador.IDENT(0).getText()+"[0]";
+        }
+        else
+            nomeVar=identificador.getText(); 
+        
+        System.out.println("nomeVar existe: "+ nomeVar); 
+        
         if(identificador.reg==null){
-            return tabela.containsKey(identificador.getText());  
+            return tabela.containsKey(nomeVar);  
         }
         else{
             //verificando se existe o registro na tabela, caso nao ja retorna falso
@@ -104,8 +114,16 @@ public class TabelaDeSimbolos {
     }
     public TipoLA verificar(LAParser.IdentificadorContext identificador)
     {
+        String nomeVar;
+        
+        //Gambiarra brabissima para ver se o vetor ja foi definido (se passar qualquer coisa dentro das chaves ele vai aceitar)
+        if(identificador.dimensao().exp_aritmetica(0)!=null){
+            nomeVar=identificador.IDENT(0).getText()+"[0]";
+        }
+        else
+            nomeVar=identificador.getText(); 
        if(identificador.reg==null){
-            return tabela.get(identificador.getText()).tipo;
+            return tabela.get(nomeVar).tipo;
        }
        else{
            //NAO FUNCIONA CASO FOR UMA ESTRURA DE UMA ESTRUTURA

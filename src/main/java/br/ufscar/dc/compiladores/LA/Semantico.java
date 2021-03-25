@@ -67,7 +67,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     
     @Override public TipoLA visitVariavel(LAParser.VariavelContext ctx) {
         //Se for um registro entao pode ter varias variaveis dentro, e isso sera tratado para cada uma delas posteriormente na recursao  
-        if (ctx.tipo().registro()!=null){
+        if (ctx.tipo().registro()!=null ){
             
             //salvando os valores anteriores da tabela
             TabelaDeSimbolos tabelaSimbolosOriginal=tabela;
@@ -105,13 +105,13 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         Boolean tipoP = ctx.tipo().tipo_estendido().pont != null;
         
         //Andando em todas variaveis de um identificador
-         for (var parametro : ctx.identificador()) { 
-            String nomeVar=parametro.getText();
+         for (var identificador : ctx.identificador()) { 
+            String nomeVar=identificador.getText();
             //System.out.println("nomeVar: "+ nomeVar); 
             if(tabela.existe(nomeVar) == true){
                 String mensagem="identificador " + nomeVar  + " ja declarado anteriormente";
                 try {
-                    this.saida.write((String.format("Linha %d: %s\n",  parametro.start.getLine(), mensagem)).getBytes());
+                    this.saida.write((String.format("Linha %d: %s\n",  identificador.start.getLine(), mensagem)).getBytes());
                 } catch (IOException ex) {
                     Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -158,7 +158,33 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                     }
 
             }
-            tabela.adicionar(nomeVar, tipoVarLA, tipoP,tipoRegistro);  
+            
+            //Verificando se eh um vetor
+            if(identificador.dimensao().exp_aritmetica(0)!=null){
+                int tamanhoVetor= Integer.parseInt(identificador.dimensao().exp_aritmetica(0).termo(0).fator(0).parcela(0).parcela_unario().NUM_INT().toString()); 
+                nomeVar=identificador.IDENT(0).getText();
+                String nomeVarPadrao=nomeVar+"[";
+                
+                //Adicionando todas posicoes do vetor como se fossem varias variaveis
+                for(int i =0; i<tamanhoVetor; i++){
+                    nomeVar=nomeVarPadrao+Integer.toString(i)+"]"; 
+                    tabela.adicionar(nomeVar, tipoVarLA, tipoP,tipoRegistro);
+                    //System.out.println("nomeVar: "+ nomeVar); 
+                }
+            
+                //Caso precise de uma matriz, precisa fazer em cima dessa iteracao ai
+                /*for (var exp : identificador.dimensao().exp_aritmetica()) { 
+                    for(var termo : exp.termo()){
+                        for(var fator : termo.fator()){
+                            for(var parcela : fator.parcela()){
+                                System.out.println(parcela.parcela_unario().NUM_INT().toString()); 
+                            }
+                        }
+                    }
+                }*/
+            }
+            else
+                tabela.adicionar(nomeVar, tipoVarLA, tipoP,tipoRegistro);  
         }
 
         return visitChildren(ctx); 
@@ -169,13 +195,11 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         //Verificando se todos identificadores/parametros que sao chamados no leia existem na tabela
     
         for (var identificador : ctx.identificador()) {
-                    if(tabela.existe(identificador) == false){
+                    Boolean existeIdentificador;
+                    existeIdentificador=tabela.existe(identificador);
+                    if(existeIdentificador == false){
                         String mensagem="identificador " + identificador.getText()  + " nao declarado";
-                        try {
-                            this.saida.write((String.format("Linha %d: %s\n",  identificador.IDENT(0).getSymbol().getLine(), mensagem)).getBytes());
-                        } catch (IOException ex) {
-                            Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                        LASemanticoUtils.adicionarErroSemantico(identificador.start, mensagem);
                     }
             }
         
@@ -192,8 +216,15 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     @Override public TipoLA visitCmdatribuicao(LAParser.CmdatribuicaoContext ctx) {
         var identificador = ctx.identificador();
         var expressao = ctx.expressao();
-        //System.out.println(identificador.IDENT(0).getText());         
         
+        System.out.println(identificador.getText());         
+        
+        //Verificando se o identificador esta na tabela antes de prosseguir
+        if(tabela.existe(identificador)==false){
+            String mensagem="identificador " + identificador.getText()+ " nao declarado";
+            LASemanticoUtils.adicionarErroSemantico(identificador.start, mensagem );
+            return visitChildren(ctx);
+        }
         TipoLA tipoIdentificador=tabela.verificar(identificador);
         TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
 
@@ -225,6 +256,14 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
         return visitChildren(ctx); 
     }
+    
+    @Override public TipoLA visitCmdpara(LAParser.CmdparaContext ctx) {
+        
+        //Adicionando na tabela o iterador "i"
+        tabela.adicionar(ctx.IDENT().getText(), TabelaDeSimbolos.TipoLA.INTEIRO);  
+        return visitChildren(ctx); 
+    }
+	
 }
 
 //Linha 21: atribuicao nao compativel para classificacao
