@@ -251,6 +251,42 @@ public class LASemanticoUtils {
         return ret;
     }
     
+    public static TabelaDeSimbolos.TipoLA verificaTipoVar(TabelaDeSimbolos tabela, String tipoVar, TabelaDeSimbolos tipoRegistro){
+         
+        TabelaDeSimbolos.TipoLA tipoVarLA;
+        
+        switch(tipoVar) {               //Verificando se o simbolo foi digitado corretamente
+            case "literal":
+                tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
+                //tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL);
+                //System.out.println("Tipo certo: "+ tipoVar); 
+                break;
+            case "inteiro":
+                tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INTEIRO;
+                //System.out.println("Tipo certo: "+ tipoVar); 
+                break;
+            case "real":
+                tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL;
+                //System.out.println("Tipo certo: "+ tipoVar); 
+                break;
+            case "logico":
+                tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO;
+                //System.out.println("Tipo certo: "+ tipoVar); 
+                break;
+            default:
+                //verificando se existe um registro deste tipo
+                if(tabela.existe(tipoVar) == true){
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO;
+                }
+                else{
+                    //System.out.println("Tipo errado: "+ tipoVar);
+                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO;
+                }
+                
+
+            }
+        return tipoVarLA;
+    }
     
     
     

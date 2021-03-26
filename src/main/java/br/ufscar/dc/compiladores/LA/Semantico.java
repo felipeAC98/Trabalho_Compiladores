@@ -31,8 +31,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         return visitChildren(ctx); 
     }
     
-    @Override public TipoLA visitDeclaracao_local(LAParser.Declaracao_localContext ctx) { 
-        
+    @Override public TipoLA visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {    
         //Se for somente uma definicao de tipo, devera entrar aqui para criar a subtabela do registro em questao
         if (ctx.tipo()!=null &&  ctx.tipo().registro()!=null){
 
@@ -59,14 +58,35 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                 return retornoFilho;
 
             }
-        
-        else{
-            return visitChildren(ctx);
-        }
+        else
+        //Quando tiver um tipo basico entao uma declaracao de constante foi feita
+        if( ctx.tipo_basico()!=null){
+            String tipoVar=ctx.tipo_basico().getText();
+            String nomeVar=ctx.IDENT().getText();
+            
+            TipoLA tipoVarLA = LASemanticoUtils.verificaTipoVar(tabela, tipoVar, null);; 
+            
+            if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO){
+                String mensagem="tipo " + tipoVar  + " nao declarado";
+                {
+                    try {
+                        this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
+                    } catch (IOException ex) {
+                        Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+            
+            tabela.adicionar(nomeVar, tipoVarLA);  
+
+        }     
+
+        return visitChildren(ctx);
+
     }
     
     @Override public TipoLA visitVariavel(LAParser.VariavelContext ctx) {
-        //Se for um registro entao pode ter varias variaveis dentro, e isso sera tratado para cada uma delas posteriormente na recursao  
+        //Se for um registro entao pode ter varias variaveis dentro, e isso sera tratado para cada uma delas posteriormente na recursao          
         if (ctx.tipo().registro()!=null ){
             
             //salvando os valores anteriores da tabela
@@ -117,46 +137,23 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                 }
             }
             
-            TipoLA tipoVarLA;
+            //Obtendo o tipo da variavel
+            TipoLA tipoVarLA = LASemanticoUtils.verificaTipoVar(tabela, tipoVar, tipoRegistro); 
             
-            switch(tipoVar) {               //Verificando se o simbolo foi digitado corretamente
-
-                case "literal":
-                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
-                    //tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL);
-                    //System.out.println("Tipo certo: "+ tipoVar); 
-                    break;
-                case "inteiro":
-                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INTEIRO;
-                    //System.out.println("Tipo certo: "+ tipoVar); 
-                    break;
-                case "real":
-                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REAL;
-                    //System.out.println("Tipo certo: "+ tipoVar); 
-                    break;
-                case "logico":
-                    tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LOGICO;
-                    //System.out.println("Tipo certo: "+ tipoVar); 
-                    break;
-                default:
-                    //verificando se existe um registro deste tipo
-                    if(tabela.existe(tipoVar) == true){
-                        tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO;
-                        tipoRegistro = tabela.obtemTabelaRegistro(tipoVar);
+            if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO){
+                //System.out.println("Tipo errado: "+ tipoVar);
+                String mensagem="tipo " + tipoVar  + " nao declarado";
+                {
+                    try {
+                        this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
+                    } catch (IOException ex) {
+                        Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    else{
-                        //System.out.println("Tipo errado: "+ tipoVar);
-                        tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.LITERAL;
-                        String mensagem="tipo " + tipoVar  + " nao declarado";
-                        {
-                            try {
-                                this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
-                            } catch (IOException ex) {
-                                Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    }
-
+                }
+            }
+            //Verificando se eh um registro para obter a tabela interna
+            else if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO){
+                tipoRegistro = tabela.obtemTabelaRegistro(tipoVar);
             }
             
             //Verificando se eh um vetor
@@ -217,7 +214,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         var identificador = ctx.identificador();
         var expressao = ctx.expressao();
         
-        System.out.println(identificador.getText());         
+        //System.out.println(identificador.getText());         
         
         //Verificando se o identificador esta na tabela antes de prosseguir
         if(tabela.existe(identificador)==false){
