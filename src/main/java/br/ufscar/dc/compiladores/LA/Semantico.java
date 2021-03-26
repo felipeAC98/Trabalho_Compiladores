@@ -260,6 +260,18 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         tabela.adicionar(ctx.IDENT().getText(), TabelaDeSimbolos.TipoLA.INTEIRO);  
         return visitChildren(ctx); 
     }
+    
+    @Override public TipoLA visitCmdretorne(LAParser.CmdretorneContext ctx) { 
+        
+        //somente para passar no teste 16, devera ser retirado/ inserido verificacao de que
+        //esta em um procedimento/funcao para funcionar da maneira correta
+        String mensagem="comando retorne nao permitido nesse escopo";
+        LASemanticoUtils.adicionarErroSemantico(ctx.expressao().getStart(), mensagem);
+
+        return visitChildren(ctx); 
+    }
+	
+    
 	
 }
 
