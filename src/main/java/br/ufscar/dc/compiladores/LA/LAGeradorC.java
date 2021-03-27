@@ -384,6 +384,13 @@ public class LAGeradorC extends LABaseVisitor<Void>{
         return null;
     }
     
+    @Override
+    public Void visitCmdatribuicao(LAParser.CmdatribuicaoContext ctx)
+    {
+        saida.append("\t" + ctx.identificador().getText() + " = " + ctx.expressao().getText() + ";\n");
+        return null;
+    }
+    
     /*@Override
     public Void visitCorpo(LAParser.CorpoContext ctx)
     {
