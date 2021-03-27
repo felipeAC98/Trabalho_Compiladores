@@ -342,7 +342,13 @@ public class LAGeradorC extends LABaseVisitor<Void>{
         saida.append(ctx.expressao().getText());
         saida.append("){\n");
         
-        ctx.cmd().forEach(dec -> visitCmd(dec));
+        for (Integer i = 0; i < ctx.cmd().size(); i++)
+        {
+            saida.append("\t");
+            visitCmd(ctx.cmd(i));
+        }
+        
+        saida.append("\t}\n");
         
         if(ctx.cmd().size() > 1)
         {
