@@ -6,6 +6,8 @@
 package br.ufscar.dc.compiladores.LA;
 
 import br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -14,6 +16,7 @@ import br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA;
 public class LAGeradorC extends LABaseVisitor<Void>{
     StringBuilder saida;
     TabelaDeSimbolos tabela;
+    List<String> variaveisLeia = new ArrayList<String>();
     
     public LAGeradorC()
     {
@@ -139,24 +142,51 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     @Override
     public Void visitCmdescreva(LAParser.CmdescrevaContext ctx)
     {
-        String nome = ctx.expressao(0).getText();
-        TipoLA tipo = tabela.verificar(nome);
-        String tipoPrintf = "";
+        variaveisLeia = new ArrayList<String>();
+        Integer qExpressao = ctx.expressao().size();
+        saida.append("\tprintf(\"");
         
-        switch (tipo)
-        {
-            case INTEIRO:
-                tipoPrintf = "d";
-                break;
-            case REAL:
-                tipoPrintf = "f";
-                break;
-            case LITERAL:
-                tipoPrintf = "s";
-                break;
+        for (Integer i = 0; i < qExpressao; i++){
+            visitExpressao(ctx.expressao(i));
         }
         
-        saida.append("\tprintf(\"%" + tipoPrintf + "\", " + nome + ");\n");
+        for(Integer i = 0; i < variaveisLeia.size(); i++)
+        {
+            String nome = variaveisLeia.get(i);
+            TipoLA tipo = tabela.verificar(nome);
+            String tipoPrintf = "";
+        
+            switch (tipo)
+            {
+                case INTEIRO:
+                    tipoPrintf = "d";
+                    break;
+                case REAL:
+                    tipoPrintf = "f";
+                    break;
+                case LITERAL:
+                    tipoPrintf = "s";
+                    break;
+            }
+        
+            saida.append("%" + tipoPrintf);
+        
+        }
+        
+        saida.append("\"");
+        
+        if(variaveisLeia.size() != 0)
+        {
+            saida.append(", ");
+        }
+        
+        for(Integer i = 0; i < variaveisLeia.size(); i++)
+        {
+            String nome = variaveisLeia.get(i);
+            saida.append(nome);
+        }
+        
+        saida.append(");\n");
         
         return null;
     }
@@ -164,7 +194,155 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     @Override
     public Void visitExpressao(LAParser.ExpressaoContext ctx)
     {
+        for (Integer i = 0; i < ctx.termo_logico().size(); i++){
+            visitTermo_logico(ctx.termo_logico(i));
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitTermo_logico(LAParser.Termo_logicoContext ctx)
+    {
+        for (Integer i = 0; i < ctx.fator_logico().size(); i++){
+            visitFator_logico(ctx.fator_logico(i));
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitFator_logico(LAParser.Fator_logicoContext ctx)
+    {
+        visitParcela_logica(ctx.parcela_logica());
+        return null;
+    }
+    
+    @Override
+    public Void visitParcela_logica(LAParser.Parcela_logicaContext ctx)
+    {
+        visitExp_relacional(ctx.exp_relacional());
+        return null;
+    }
+    
+    @Override
+    public Void visitExp_relacional(LAParser.Exp_relacionalContext ctx)
+    {
+        for (Integer i = 0; i < ctx.exp_aritmetica().size(); i++){
+            visitExp_aritmetica(ctx.exp_aritmetica(i));
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx)
+    {
+        for (Integer i = 0; i < ctx.termo().size(); i++){
+            visitTermo(ctx.termo(i));
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitTermo(LAParser.TermoContext ctx)
+    {
+        for (Integer i = 0; i < ctx.fator().size(); i++){
+            visitFator(ctx.fator(i));
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitFator(LAParser.FatorContext ctx)
+    {
+        for (Integer i = 0; i < ctx.parcela().size(); i++){
+            visitParcela(ctx.parcela(i));
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitParcela(LAParser.ParcelaContext ctx)
+    {
+        if(ctx.parcela_unario() != null)
+        {
+            visitParcela_unario(ctx.parcela_unario());
+        }
+        else
+        {
+            visitParcela_nao_unario(ctx.parcela_nao_unario());
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitParcela_unario(LAParser.Parcela_unarioContext ctx)
+    {
+        if(ctx.identificador() != null)
+        {
+            String nome = ctx.identificador().IDENT(0).getText();
+            variaveisLeia.add(nome);
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx)
+    {
+        if(ctx.CADEIA() != null)
+        {
+            String texto = ctx.CADEIA().getText();
+            String [] textoSemAspas = texto.split("\"");
+            saida.append(textoSemAspas[1]);
+        }
         
+        return null;
+    }
+    
+    @Override
+    public Void visitCmdse(LAParser.CmdseContext ctx)
+    {
+        saida.append("\tif(");
+        saida.append(ctx.expressao().getText());
+        saida.append("){\n");
+        
+        ctx.cmd().forEach(dec -> visitCmd(dec));
+        
+        if(ctx.cmd().size() > 1)
+        {
+            saida.append("\telse{");
+            saida.append("\t");
+            ctx.cmd().forEach(dec -> visitCmd(dec));
+            saida.append("\t}\n");
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public Void visitCmdpara(LAParser.CmdparaContext ctx)
+    {
+        saida.append("\tfor (");
+        saida.append(ctx.IDENT().getText() + " = ");
+        saida.append(ctx.exp_aritmetica(0).getText() + "; ");
+        saida.append(ctx.IDENT().getText() + " <= ");
+        saida.append(ctx.exp_aritmetica(1).getText() + "; ");
+        saida.append(ctx.IDENT().getText() + "++)\n");
+        
+        for(Integer i = 0; i < ctx.cmd().size(); i++)
+        {
+            saida.append("\t");
+            ctx.cmd().forEach(dec -> visitCmd(dec));
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public Void visitCmdenquanto(LAParser.CmdenquantoContext ctx)
+    {
+        saida.append("\twhile(");
+        saida.append(ctx.expressao().getText() + "){\n");
+        ctx.cmd().forEach(dec -> visitCmd(dec));
+        saida.append("\t}\n");
         return null;
     }
     

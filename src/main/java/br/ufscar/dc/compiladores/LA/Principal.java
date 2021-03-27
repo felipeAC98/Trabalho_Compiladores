@@ -118,6 +118,5 @@ public class Principal {
         //saida.write(("Fim da compilacao\n").getBytes());
         saida.close(); //fecha o ponteiro do arquivo de saída
         
-        
     }
 }
