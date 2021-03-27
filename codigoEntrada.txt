@@ -1,6 +1,7 @@
 algoritmo
   declare
-    x: inteiro
+    x,y: real
   leia(x)
-  escreva("O valor fornecido foi: ",x)
+  leia(y)
+  escreva(x+y)
 fim_algoritmo

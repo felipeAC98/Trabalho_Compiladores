@@ -17,6 +17,7 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     StringBuilder saida;
     TabelaDeSimbolos tabela;
     List<String> variaveisLeia = new ArrayList<String>();
+    List<String> operadorEscreva = new ArrayList<String>();
     
     public LAGeradorC()
     {
@@ -150,12 +151,35 @@ public class LAGeradorC extends LABaseVisitor<Void>{
             visitExpressao(ctx.expressao(i));
         }
         
-        for(Integer i = 0; i < variaveisLeia.size(); i++)
-        {
-            String nome = variaveisLeia.get(i);
+        if(operadorEscreva.size() == 0){
+            for(Integer i = 0; i < variaveisLeia.size(); i++)
+            {
+                String nome = variaveisLeia.get(i);
+                TipoLA tipo = tabela.verificar(nome);
+                String tipoPrintf = "";
+
+                switch (tipo)
+                {
+                    case INTEIRO:
+                        tipoPrintf = "d";
+                        break;
+                    case REAL:
+                        tipoPrintf = "f";
+                        break;
+                    case LITERAL:
+                        tipoPrintf = "s";
+                        break;
+                }
+
+                saida.append("%" + tipoPrintf);
+
+            }
+        }
+        else{
+            String nome = variaveisLeia.get(0);
             TipoLA tipo = tabela.verificar(nome);
             String tipoPrintf = "";
-        
+
             switch (tipo)
             {
                 case INTEIRO:
@@ -168,9 +192,8 @@ public class LAGeradorC extends LABaseVisitor<Void>{
                     tipoPrintf = "s";
                     break;
             }
-        
+
             saida.append("%" + tipoPrintf);
-        
         }
         
         saida.append("\"");
@@ -180,10 +203,15 @@ public class LAGeradorC extends LABaseVisitor<Void>{
             saida.append(", ");
         }
         
+        Integer j = 0;
         for(Integer i = 0; i < variaveisLeia.size(); i++)
         {
             String nome = variaveisLeia.get(i);
             saida.append(nome);
+            
+            if(j < operadorEscreva.size()){
+                saida.append(operadorEscreva.get(j++));
+            }
         }
         
         saida.append(");\n");
@@ -235,9 +263,19 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     @Override
     public Void visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx)
     {
+        operadorEscreva = new ArrayList<String>();
+        
         for (Integer i = 0; i < ctx.termo().size(); i++){
             visitTermo(ctx.termo(i));
         }
+        if(ctx.op1() != null)
+        {
+            for (Integer i = 0; i < ctx.op1().size(); i++)
+            {
+                operadorEscreva.add(ctx.op1(i).getText());
+            }
+        }
+        
         return null;
     }
     
