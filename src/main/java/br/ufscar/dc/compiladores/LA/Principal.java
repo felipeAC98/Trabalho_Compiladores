@@ -28,6 +28,7 @@ package br.ufscar.dc.compiladores.LA;
 import br.ufscar.dc.compiladores.LA.LAParser.ProgramaContext;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -94,7 +95,17 @@ public class Principal {
             parser.addErrorListener(LAEL);
             ProgramaContext arvore = parser.programa();
             Semantico las = new Semantico(saida);
-            las.visitPrograma(arvore);     
+            las.visitPrograma(arvore); 
+            
+            if(LASemanticoUtils.errosSemanticos.isEmpty())
+            {
+                LAGeradorC gerador = new LAGeradorC();
+                gerador.visitPrograma(arvore);
+                try(PrintWriter pw = new PrintWriter(args[1]))
+                {
+                    pw.print(gerador.saida.toString());
+                }
+            }
         }
         
         //Escrevendo os erros gravados no LASemanticoUtils para um arquivo
@@ -104,9 +115,9 @@ public class Principal {
             saida.write((erroSemantico + "\n").getBytes());
         }   
         
-        saida.write(("Fim da compilacao\n").getBytes());
+        //saida.write(("Fim da compilacao\n").getBytes());
         saida.close(); //fecha o ponteiro do arquivo de saída
-        return;    
+        
         
     }
 }
