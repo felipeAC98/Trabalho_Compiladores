@@ -94,7 +94,7 @@ public class Principal {
             parser.removeErrorListeners();
             parser.addErrorListener(LAEL);
             ProgramaContext arvore = parser.programa();
-            Semantico las = new Semantico(saida);
+            Semantico las = new Semantico();
             las.visitPrograma(arvore); 
             
             if(LASemanticoUtils.errosSemanticos.isEmpty())

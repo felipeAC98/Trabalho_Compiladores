@@ -15,8 +15,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     public TabelaDeSimbolos tabela;
     FileOutputStream saida;
     
-    public Semantico(FileOutputStream saida){
-        this.saida=saida;
+    public Semantico(){
     }
     
     public TabelaDeSimbolos getTabela() {
@@ -138,13 +137,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             
             if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO){
                 String mensagem="tipo " + tipoVar  + " nao declarado";
-                {
-                    try {
-                        this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
-                    } catch (IOException ex) {
-                        Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+                LASemanticoUtils.adicionarErroSemantico(ctx.tipo_basico().getStart(), mensagem);
             }
             
             tabela.adicionar(nomeVar, tipoVarLA);  
@@ -200,11 +193,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             //System.out.println("nomeVar: "+ nomeVar); 
             if(tabela.existe(nomeVar) == true){
                 String mensagem="identificador " + nomeVar  + " ja declarado anteriormente";
-                try {
-                    this.saida.write((String.format("Linha %d: %s\n",  identificador.start.getLine(), mensagem)).getBytes());
-                } catch (IOException ex) {
-                    Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                LASemanticoUtils.adicionarErroSemantico(identificador.getStart(), mensagem);
             }
             
             //Obtendo o tipo da variavel
@@ -213,13 +202,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO){
                 //System.out.println("Tipo errado: "+ tipoVar);
                 String mensagem="tipo " + tipoVar  + " nao declarado";
-                {
-                    try {
-                        this.saida.write((String.format("Linha %d: %s\n", ctx.tipo().start.getLine() , mensagem)).getBytes());
-                    } catch (IOException ex) {
-                        Logger.getLogger(Semantico.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+                LASemanticoUtils.adicionarErroSemantico(identificador.getStart(), mensagem);
             }
             //Verificando se eh um registro para obter a tabela interna
             else if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO){
