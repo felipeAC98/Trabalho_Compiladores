@@ -27,6 +27,17 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     public TipoLA visitPrograma(LAParser.ProgramaContext ctx) {
         //Inicializando tabela de simbolos
         tabela = new TabelaDeSimbolos();
+        
+        for(var cmd: ctx.corpo().cmd()){
+
+            //Se nao for uma funcao, nao deve ter return
+            if(cmd.cmdretorne()!=null){
+                String mensagem="comando retorne nao permitido nesse escopo";
+                LASemanticoUtils.adicionarErroSemantico(cmd.cmdretorne().getStart(), mensagem);
+            }
+
+        }
+                    
         return visitChildren(ctx);
     }
     
@@ -74,6 +85,17 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             //Agora sim ja pode retornar o filho
             return retornoFilho;
             
+        }
+        else{
+            for(var cmd: ctx.cmd()){
+
+                //Se nao for uma funcao, nao deve ter return
+                if(cmd.cmdretorne()!=null){
+                    String mensagem="comando retorne nao permitido nesse escopo";
+                    LASemanticoUtils.adicionarErroSemantico(cmd.cmdretorne().getStart(), mensagem);
+                }
+
+            }
         }
         return visitChildren(ctx); 
     
