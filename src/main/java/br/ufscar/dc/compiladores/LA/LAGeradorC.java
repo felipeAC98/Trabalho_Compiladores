@@ -54,12 +54,91 @@ public class LAGeradorC extends LABaseVisitor<Void>{
         return null;
     }
     
-    @Override
+    /*@Override
     public Void visitDecl_local_global(LAParser.Decl_local_globalContext ctx)
     {
         visitDeclaracao_local(ctx.declaracao_local());
         return null;
+    }*/
+    
+    @Override
+    public Void visitDeclaracao_global(LAParser.Declaracao_globalContext ctx)
+    {
+        if(ctx.inicioProc != null)
+        {
+            saida.append("void ");
+            saida.append(ctx.IDENT().getText());
+            saida.append("(");
+            
+            visitParametros(ctx.parametros());
+            
+            saida.append("){\n");
+            
+            ctx.cmd().forEach(dec -> visitCmd(dec));
+            
+            saida.append("}\n");
+        }
+        return null;
     }
+    
+    @Override
+    public Void visitParametros(LAParser.ParametrosContext ctx)
+    {
+        ctx.parametro().forEach(dec -> visitParametro(dec));
+        return null;
+    }
+    
+    @Override
+    public Void visitParametro(LAParser.ParametroContext ctx)
+    {
+        String tipo;
+        TipoLA tipoLA;
+        String nome;
+        
+        for(Integer i = 0; i < ctx.identificador().size(); i++)
+        {
+            tipo = ctx.tipo_estendido().getText();
+            nome = ctx.identificador(i).IDENT(0).getText();
+            tipoLA = TipoLA.INVALIDO;
+            
+            switch(tipo)
+            {
+                case "inteiro":
+                    tipo = "int";
+                    tipoLA = TipoLA.INTEIRO;
+                    break;
+                case "real":
+                    tipo = "float";
+                    tipoLA = TipoLA.REAL;
+                    break;
+                case "literal":
+                    tipo = "char*";
+                    tipoLA = TipoLA.LITERAL;
+                    break;
+                case "logico":
+                    tipoLA = TipoLA.LOGICO;
+                    break;
+            }
+            saida.append(tipo);
+            saida.append(" ");
+            saida.append(nome);
+            
+            if(i < ctx.identificador().size() - 1)
+            {
+                saida.append(", ");
+            }
+            
+            tabela.adicionar(nome, tipoLA);
+        }
+        return null;
+    }
+    
+    /*@Override
+    public Void visitIdentificador(LAParser.IdentificadorContext ctx)
+    {
+        
+        return null;
+    }*/
     
     @Override
     public Void visitDeclaracao_local(LAParser.Declaracao_localContext ctx)
@@ -130,6 +209,10 @@ public class LAGeradorC extends LABaseVisitor<Void>{
                 {
                     tabela.adicionar(nome, tipoLA);
                 }
+                else if(ctx.identificador(0).dimensao() != null)
+                {
+                    tabela.adicionar(nome, tipoLA, true);
+                }
                 else
                 {
                     tabela.adicionar(nomeRegistro + "." + nome, tipoLA);
@@ -140,6 +223,12 @@ public class LAGeradorC extends LABaseVisitor<Void>{
                 {
                     saida.append("[80]");
                 }
+                
+                if(ctx.identificador(0).dimensao() != null)
+                {
+                    saida.append(ctx.identificador(0).dimensao().getText());
+                }
+                
                 if(i == ctx.identificador().size() - 1)
                 {
                     saida.append(";\n");
@@ -152,13 +241,12 @@ public class LAGeradorC extends LABaseVisitor<Void>{
         }
         else
         {
-            System.out.println("ENTROU AQUI PQ");
             registro = true;
             saida.append("\tstruct {\n");
         
             nome = ctx.identificador(0).IDENT(0).getText();
             nomeRegistro = nome;
-                
+            
             Integer qtdVar = ctx.tipo().registro().variavel().size();
             tabela.adicionar(nome, tipoLA);
             
@@ -170,6 +258,7 @@ public class LAGeradorC extends LABaseVisitor<Void>{
             registro = false;
             
             saida.append("\t} "+ nome + ";\n");
+            
         }
         
         return null;
@@ -221,11 +310,8 @@ public class LAGeradorC extends LABaseVisitor<Void>{
         }
         
         if(operadorEscreva.size() == 0){
-            
-            System.out.println("aaaaaaaaaaaaaa");
             for(Integer i = 0; i < variaveisLeia.size(); i++)
             {
-                System.out.println("oie");
                 String nome = variaveisLeia.get(i);
                 TipoLA tipo = tabela.verificar(nome);
                 String tipoPrintf = "";
@@ -248,7 +334,6 @@ public class LAGeradorC extends LABaseVisitor<Void>{
             }
         }
         else{
-            System.out.println("aaaaaaaaaaaaaa");
             String nome = variaveisLeia.get(0);
             TipoLA tipo = tabela.verificar(nome);
             String tipoPrintf = "";
@@ -349,7 +434,6 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     @Override
     public Void visitExp_relacional(LAParser.Exp_relacionalContext ctx)
     {
-        //System.out.print("AQUI " + ctx.getText() + "\n");
         if(ctx.op_relacional(0) != null)
         {
             saida.append(ctx.exp_aritmetica(0).getText() + " ");
@@ -444,14 +528,16 @@ public class LAGeradorC extends LABaseVisitor<Void>{
             {
                 nome = ctx.identificador().IDENT(0).getText() + "." + ctx.identificador().IDENT(1).getText();
             }
+            System.out.println("alo"+nome);
             variaveisLeia.add(nome);
             
             if(operadorEscreva.isEmpty()){
+                
                 for(Integer i = 0; i < variaveisLeia.size(); i++)
                 {
                     TipoLA tipo = tabela.verificar(nome);
                     String tipoPrintf = "";
-
+                    
                     switch (tipo)
                     {
                         case INTEIRO:
@@ -579,20 +665,34 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     {
         saida.append("\t");
         
-        System.out.println("nome " + ctx.identificador().getText());
-        System.out.println(tabela.verificar(ctx.identificador().getText()));
-        
-        if(tabela.verificar(ctx.identificador().getText()) != TipoLA.LITERAL)
-        {
-            if(ctx.pont != null)
+        if(ctx.identificador().dimensao() == null){
+            if(tabela.verificar(ctx.identificador().getText()) != TipoLA.LITERAL)
             {
-                saida.append("*");
+                if(ctx.pont != null)
+                {
+                    saida.append("*");
+                }
+                saida.append(ctx.identificador().getText() + " = " + ctx.expressao().getText() + ";\n");
             }
-            saida.append(ctx.identificador().getText() + " = " + ctx.expressao().getText() + ";\n");
+            else
+            {
+                saida.append("strcpy(" + ctx.identificador().getText() + ", " + ctx.expressao().getText() + ");\n");
+            }
         }
         else
         {
-            saida.append("strcpy(" + ctx.identificador().getText() + ", " + ctx.expressao().getText() + ");\n");
+            if(tabela.verificar(ctx.identificador().IDENT(0).getText()) != TipoLA.LITERAL)
+            {
+                if(ctx.pont != null)
+                {
+                    saida.append("*");
+                }
+                saida.append(ctx.identificador().getText() + " = " + ctx.expressao().getText() + ";\n");
+            }
+            else
+            {
+                saida.append("strcpy(" + ctx.identificador().getText() + ", " + ctx.expressao().getText() + ");\n");
+            }
         }
         
         return null;
