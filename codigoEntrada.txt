@@ -1,8 +1,9 @@
 algoritmo
-  declare i: inteiro
-  i <- 1
-  faca
-    escreva(i,"\n")
-    i <- i + 1
-  ate nao (i = 6)
+  declare x: inteiro
+  declare endx: ^inteiro
+  x <- 0
+  escreva(x," e ")
+  endx <- &x
+  ^endx <- 1
+  escreva(x)
 fim_algoritmo

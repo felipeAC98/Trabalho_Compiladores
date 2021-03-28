@@ -151,7 +151,7 @@ parcela_unario: (pont='^')? identificador
                 | IDENT '(' expressao (',' expressao)* ')'
                 | NUM_INT
                 | NUM_REAL
-                | '(' expressao ')';
+                | parUnExp='(' expressao ')';
 parcela_nao_unario: '&' identificador | CADEIA;
 
 exp_relacional: exp_aritmetica (op_relacional exp_aritmetica)*;

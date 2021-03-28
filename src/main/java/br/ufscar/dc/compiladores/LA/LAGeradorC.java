@@ -79,26 +79,38 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     {
         TipoLA tipoLA = TipoLA.INVALIDO;
         String tipo = ctx.tipo().getText();
+        
         switch(tipo)
         {
             case "inteiro":
+            case "^inteiro":
                 tipo = "int";
                 tipoLA = TipoLA.INTEIRO;
                 break;
             case "real":
+            case "^real":
                 tipo = "float";
                 tipoLA = TipoLA.REAL;
                 break;
             case "literal":
+            case "^literal":
                 tipo = "char";
                 tipoLA = TipoLA.LITERAL;
                 break;
             case "logico":
+            case "^logico":
                 tipoLA = TipoLA.LOGICO;
                 break;
         }
 
-        saida.append("\t" + tipo + " ");
+        if(ctx.tipo().tipo_estendido().pont != null)
+        {
+            saida.append("\t" + tipo + "* ");
+        }
+        else
+        {
+            saida.append("\t" + tipo + " ");
+        }
         
         String nome;
         for (Integer i = 0; i < ctx.identificador().size(); i++)
@@ -259,7 +271,7 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     {
         if(ctx.not != null)
         {
-            saida.append("!");
+            saida.append("!(");
             /*if(ctx.parcela_logica().exp_relacional().op_relacional(0) != null)
             {
                 saida.append("(");
@@ -268,9 +280,14 @@ public class LAGeradorC extends LABaseVisitor<Void>{
                 saida.append(ctx.parcela_logica().exp_relacional().exp_aritmetica(1).getText());
                 saida.append(")");
             }*/
+            visitParcela_logica(ctx.parcela_logica());
+            saida.append(")");
+        }
+        else
+        {
+            visitParcela_logica(ctx.parcela_logica());
         }
         
-        visitParcela_logica(ctx.parcela_logica());
         return null;
     }
     
@@ -284,6 +301,7 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     @Override
     public Void visitExp_relacional(LAParser.Exp_relacionalContext ctx)
     {
+        //System.out.print("AQUI " + ctx.getText() + "\n");
         if(ctx.op_relacional(0) != null)
         {
             saida.append(ctx.exp_aritmetica(0).getText() + " ");
@@ -420,6 +438,10 @@ public class LAGeradorC extends LABaseVisitor<Void>{
                 }
             }
         }
+        else if(ctx.parUnExp != null)
+        {
+            visitExpressao(ctx.expressao(0));
+        }
         return null;
     }
     
@@ -499,7 +521,13 @@ public class LAGeradorC extends LABaseVisitor<Void>{
     @Override
     public Void visitCmdatribuicao(LAParser.CmdatribuicaoContext ctx)
     {
-        saida.append("\t" + ctx.identificador().getText() + " = " + ctx.expressao().getText() + ";\n");
+        saida.append("\t");
+        if(ctx.pont != null)
+        {
+            saida.append("*");
+        }
+        saida.append(ctx.identificador().getText() + " = " + ctx.expressao().getText() + ";\n");
+        
         return null;
     }
     
