@@ -106,17 +106,18 @@ public class Principal {
                     pw.print(gerador.saida.toString());
                 }
             }
+            else{
+               //Escrevendo os erros gravados no LASemanticoUtils para um arquivo
+                List<String> errosSemanticos = LASemanticoUtils.errosSemanticos;
+                  for (var erroSemantico : errosSemanticos) {
+                      saida.write((erroSemantico + "\n").getBytes());
+                  }   
+
+                  saida.write(("Fim da compilacao\n").getBytes());  
+            }
         }
         
-        //Escrevendo os erros gravados no LASemanticoUtils para um arquivo
-        List<String> errosSemanticos = LASemanticoUtils.errosSemanticos;
-        
-        for (var erroSemantico : errosSemanticos) {
-            saida.write((erroSemantico + "\n").getBytes());
-        }   
-        
-        //saida.write(("Fim da compilacao\n").getBytes());
         saida.close(); //fecha o ponteiro do arquivo de saída
-        
+        //return ;
     }
 }

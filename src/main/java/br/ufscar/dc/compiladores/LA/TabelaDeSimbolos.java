@@ -8,13 +8,16 @@ package br.ufscar.dc.compiladores.LA;
 import br.ufscar.dc.compiladores.LA.LAParser.IdentificadorContext;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 /**
  *
  * @author mariz
  */
 public class TabelaDeSimbolos {
+
     public enum TipoLA{
         INTEIRO,
         LITERAL,
@@ -28,6 +31,7 @@ public class TabelaDeSimbolos {
         TipoLA tipo;
         Boolean ponteiro;
         TabelaDeSimbolos subTabelaRegistro;
+        
         
         private EntradaTabelaDeSimbolos(String nome, TipoLA tipo)
         {
@@ -49,14 +53,15 @@ public class TabelaDeSimbolos {
             this.tipo = tipo;
             this.ponteiro = ponteiro;
             this.subTabelaRegistro = subTabelaRegistro;
+
         }
     }
-    private final Map<String, EntradaTabelaDeSimbolos> tabela;
+    private final LinkedHashMap<String, EntradaTabelaDeSimbolos> tabela;
     private final Map<String, String> tabelaDeRegistros;
-    
+     
     public TabelaDeSimbolos()
     {
-        this.tabela = new HashMap<>();
+        this.tabela = new LinkedHashMap<>();
         this.tabelaDeRegistros = new HashMap<>();
     }
     public void adicionar(String nome, TipoLA tipo)
@@ -90,7 +95,7 @@ public class TabelaDeSimbolos {
         else
             nomeVar=identificador.getText(); 
         
-        System.out.println("nomeVar existe: "+ nomeVar); 
+        //System.out.println("nomeVar existe: "+ nomeVar); 
         
         if(identificador.reg==null){
             return tabela.containsKey(nomeVar);  
@@ -99,7 +104,7 @@ public class TabelaDeSimbolos {
             //verificando se existe o registro na tabela, caso nao ja retorna falso
            if(tabela.get(identificador.IDENT(0).getText())!=null){
                //NAO FUNCIONA CASO FOR UMA ESTRURA DE UMA ESTRUTURA
-                TabelaDeSimbolos tabelaRegistro=obtemTabelaRegistro(identificador.IDENT(0).getText());
+                TabelaDeSimbolos tabelaRegistro=obtemSubTabela(identificador.IDENT(0).getText());
                 return tabelaRegistro.existe(identificador.IDENT(1).getText());
            }
            else{
@@ -111,6 +116,13 @@ public class TabelaDeSimbolos {
     public TipoLA verificar(String nome)
     {
         return tabela.get(nome).tipo;
+    }
+    
+    public TipoLA verificar(int tipoID)
+    {
+        List<EntradaTabelaDeSimbolos> l;
+        l = new ArrayList<EntradaTabelaDeSimbolos>(tabela.values());
+        return l.get(tipoID).tipo;
     }
     public TipoLA verificar(LAParser.IdentificadorContext identificador)
     {
@@ -127,7 +139,7 @@ public class TabelaDeSimbolos {
        }
        else{
            //NAO FUNCIONA CASO FOR UMA ESTRURA DE UMA ESTRUTURA
-           TabelaDeSimbolos tabelaRegistro=obtemTabelaRegistro(identificador.IDENT(0).getText());
+           TabelaDeSimbolos tabelaRegistro=obtemSubTabela(identificador.IDENT(0).getText());
            return tabelaRegistro.verificar(identificador.IDENT(1).getText());
            
            //ideia caso estrutura de uma estrutura ->chamar recursivamente esta funcao para cada tabela
@@ -136,9 +148,14 @@ public class TabelaDeSimbolos {
        }
     }
     
-    public TabelaDeSimbolos obtemTabelaRegistro(String nome){
+    public TabelaDeSimbolos obtemSubTabela(String nome){
         return tabela.get(nome).subTabelaRegistro;
     }
+    
+    public int obtemTamanhoTabela(){
+        return tabela.size();
+    }
+    
     public Boolean verificarPonteiro(String nome)
     {
         return tabela.get(nome).ponteiro;
@@ -151,7 +168,7 @@ public class TabelaDeSimbolos {
        }
        else{
            //NAO FUNCIONA CASO FOR UMA ESTRURA DE UMA ESTRUTURA
-           TabelaDeSimbolos tabelaRegistro=obtemTabelaRegistro(identificador.IDENT(0).getText());
+           TabelaDeSimbolos tabelaRegistro=obtemSubTabela(identificador.IDENT(0).getText());
            return tabelaRegistro.verificarPonteiro(identificador.IDENT(1).getText());
            
            //ideia caso estrutura de uma estrutura ->chamar recursivamente esta funcao para cada tabela
@@ -173,9 +190,4 @@ public class TabelaDeSimbolos {
     }
     
     
-    //public TipoLA verificarRegistro(String nome)
-    //{
-        //return tabelaDeRegistros.get(nome).;
-        //como retornar o tipo do registro?
-    //}
 }

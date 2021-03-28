@@ -1,9 +1,13 @@
 package br.ufscar.dc.compiladores.LA;
 
+import br.ufscar.dc.compiladores.LA.LAParser.ExpressaoContext;
+import br.ufscar.dc.compiladores.LA.LAParser.IdentificadorContext;
 import static br.ufscar.dc.compiladores.LA.LASemanticoUtils.adicionarErroSemantico;
 import br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +33,50 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     @Override public TipoLA visitExpressao(LAParser.ExpressaoContext ctx) {
 
         return visitChildren(ctx); 
+    }
+    
+    @Override public TipoLA visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
+        
+        //Verificando se possui uma funcao nessa declaracao
+        if(ctx.inicioFuncao!=null){
+            
+            TabelaDeSimbolos tabelaSimbolosOriginal=tabela;
+            
+            String nomeFuncao = ctx.IDENT().getText();
+            
+            //Criando uma subtabela para adicionar os elementos da funcao
+            TabelaDeSimbolos tabelaFuncao= new TabelaDeSimbolos();
+            
+            for (var parametro : ctx.parametros().parametro()) { 
+                //System.out.println("parametro: "+ parametro.identificador(0).getText()); 
+                String nomeVar=parametro.identificador(0).getText();
+                
+                //Obtendo o tipo da variavel
+                String tipoVar =parametro.tipo_estendido().tipo_basico_ident().tipo_basico().getText();
+                TipoLA tipoVarLA=LASemanticoUtils.verificaTipoVar(tabela, tipoVar, null);
+
+                tabelaFuncao.adicionar(nomeVar, tipoVarLA);  
+            }
+            
+            tabela=tabelaFuncao;
+            //Chamando o filho para ele usar da tabela que foi criada com os parametros recebidos pela funcao
+            TipoLA retornoFilho= visitChildren(ctx); 
+            
+            //Retornando os valores originais da tabela, os valores criados dentro da ffuncao ja podem ser descartados pois nao devem contar em outros escopos
+            tabela=tabelaSimbolosOriginal;
+            
+            String tipoFuncao =ctx.tipo_estendido().getText();
+            TipoLA tipoFuncaoLA=LASemanticoUtils.verificaTipoVar(tabela, tipoFuncao, null);
+            
+            //inserindo na tabela principal a funcao que ira ser do tipo de seu retorno
+            tabela.adicionar(nomeFuncao, tipoFuncaoLA, false, tabelaFuncao);
+            
+            //Agora sim ja pode retornar o filho
+            return retornoFilho;
+            
+        }
+        return visitChildren(ctx); 
+    
     }
     
     @Override public TipoLA visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {    
@@ -64,7 +112,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             String tipoVar=ctx.tipo_basico().getText();
             String nomeVar=ctx.IDENT().getText();
             
-            TipoLA tipoVarLA = LASemanticoUtils.verificaTipoVar(tabela, tipoVar, null);; 
+            TipoLA tipoVarLA = LASemanticoUtils.verificaTipoVar(tabela, tipoVar, null); 
             
             if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO){
                 String mensagem="tipo " + tipoVar  + " nao declarado";
@@ -153,7 +201,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             }
             //Verificando se eh um registro para obter a tabela interna
             else if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO){
-                tipoRegistro = tabela.obtemTabelaRegistro(tipoVar);
+                tipoRegistro = tabela.obtemSubTabela(tipoVar);
             }
             
             //Verificando se eh um vetor
@@ -265,14 +313,41 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
         //somente para passar no teste 16, devera ser retirado/ inserido verificacao de que
         //esta em um procedimento/funcao para funcionar da maneira correta
-        String mensagem="comando retorne nao permitido nesse escopo";
-        LASemanticoUtils.adicionarErroSemantico(ctx.expressao().getStart(), mensagem);
+        //String mensagem="comando retorne nao permitido nesse escopo";
+        //LASemanticoUtils.adicionarErroSemantico(ctx.expressao().getStart(), mensagem);
 
         return visitChildren(ctx); 
+    } 
+
+    @Override public TipoLA visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
+        if (ctx.IDENT() != null) {
+            String nomeFuncao = ctx.IDENT().getText();
+            //Essa subtabela eh a tabela da funcao, ou seja, seus parametros
+            TabelaDeSimbolos subTabela=tabela.obtemSubTabela(nomeFuncao);
+            
+            //Verificando se o numero de parametros(expressoes) passadas sao do mesmo tamanho do esperado por aquela funcao
+            if (subTabela.obtemTamanhoTabela() == ctx.expressao().size()) {
+                
+                //Cada expressao eh um parametro aqui
+                for (int numExpressao = 0; numExpressao < ctx.expressao().size(); numExpressao++) {
+                   ExpressaoContext expressao = ctx.expressao(numExpressao);
+                   
+                   //Obtendo tipo da expressao passada e do parametro da funcao 
+                   TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
+                   TipoLA tipoParametro = subTabela.verificar(numExpressao);
+                   
+                   if(tipoExpressao!=tipoParametro){
+                       LASemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(), "incompatibilidade de parametros na chamada de " + nomeFuncao);
+                   }
+                   
+                }
+            } else {
+                LASemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(), "incompatibilidade de parametros na chamada de " + nomeFuncao);
+            }
+        }
+        
+        return visitChildren(ctx);
     }
-	
-    
-	
 }
 
 //Linha 21: atribuicao nao compativel para classificacao
