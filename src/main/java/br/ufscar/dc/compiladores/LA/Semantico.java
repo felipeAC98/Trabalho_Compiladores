@@ -48,7 +48,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     @Override public TipoLA visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
         
         //Verificando se possui uma funcao nessa declaracao
-        if(ctx.inicioFuncao!=null){
+        if(ctx.inicioFuncao!=null || ctx.inicioProc!=null  ){
             
             TabelaDeSimbolos tabelaSimbolosOriginal=tabela;
             
@@ -58,28 +58,55 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             TabelaDeSimbolos tabelaFuncao= new TabelaDeSimbolos();
             
             for (var parametro : ctx.parametros().parametro()) { 
-                //System.out.println("parametro: "+ parametro.identificador(0).getText()); 
+                System.out.println("parametro: "+ parametro.identificador(0).getText()); 
                 String nomeVar=parametro.identificador(0).getText();
+                String tipoVar;
                 
                 //Obtendo o tipo da variavel
-                String tipoVar =parametro.tipo_estendido().tipo_basico_ident().tipo_basico().getText();
+                if(parametro.tipo_estendido().tipo_basico_ident().tipo_basico()!=null)
+                    tipoVar =parametro.tipo_estendido().tipo_basico_ident().tipo_basico().getText();
+                else //Caso seja um registro, vai entrar aqui
+                    tipoVar =parametro.tipo_estendido().tipo_basico_ident().IDENT().getText();
+                
                 TipoLA tipoVarLA=LASemanticoUtils.verificaTipoVar(tabela, tipoVar, null);
 
-                tabelaFuncao.adicionar(nomeVar, tipoVarLA);  
+                //Tratando o recebimento de um registro como parametro
+                TabelaDeSimbolos tipoRegistro=null;
+                if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO){
+                    tipoRegistro = tabela.obtemSubTabela(tipoVar);
+                }
+                                
+                tabelaFuncao.adicionar(nomeVar, tipoVarLA, false, tipoRegistro);  
             }
             
             tabela=tabelaFuncao;
             //Chamando o filho para ele usar da tabela que foi criada com os parametros recebidos pela funcao
             TipoLA retornoFilho= visitChildren(ctx); 
-            
             //Retornando os valores originais da tabela, os valores criados dentro da ffuncao ja podem ser descartados pois nao devem contar em outros escopos
             tabela=tabelaSimbolosOriginal;
             
-            String tipoFuncao =ctx.tipo_estendido().getText();
-            TipoLA tipoFuncaoLA=LASemanticoUtils.verificaTipoVar(tabela, tipoFuncao, null);
+            TipoLA tipoRetornoLA;
+                    
+            //Caso seja uma funcao, entao a variavel referente a funcao na tabela sera do tipo do retorno da funcao
+            if(ctx.inicioFuncao!=null){
+                 String tipoFuncao=ctx.tipo_estendido().getText();
+                 tipoRetornoLA=LASemanticoUtils.verificaTipoVar(tabela, tipoFuncao, null);
             
+            }else{
+                 tipoRetornoLA= br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.PROCEDIMENTO;
+                 //Aproveitando para ver se nao tem nenhum return nesse procedimento 
+                 for(var cmd: ctx.cmd()){
+
+                    //Se nao for uma funcao, nao deve ter return
+                    if(cmd.cmdretorne()!=null){
+                        String mensagem="comando retorne nao permitido nesse escopo";
+                        LASemanticoUtils.adicionarErroSemantico(cmd.cmdretorne().getStart(), mensagem);
+                    }
+
+                }
+            }
             //inserindo na tabela principal a funcao que ira ser do tipo de seu retorno
-            tabela.adicionar(nomeFuncao, tipoFuncaoLA, false, tabelaFuncao);
+            tabela.adicionar(nomeFuncao, tipoRetornoLA, false, tabelaFuncao);
             
             //Agora sim ja pode retornar o filho
             return retornoFilho;
@@ -119,7 +146,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
 
                 //inserindo as tabelas de cada registro na tabela geral
                 String nomeVar=ctx.IDENT().getText();
-                //System.out.println("nomeVar: "+ nomeVar);
+                //System.out.println("registro: "+ nomeVar);
                 Boolean tipoP = false;
                 tabela.adicionar(nomeVar, br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO, tipoP, tabelaRegistro );
 
@@ -190,7 +217,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         //Andando em todas variaveis de um identificador
          for (var identificador : ctx.identificador()) { 
             String nomeVar=identificador.getText();
-            //System.out.println("nomeVar: "+ nomeVar); 
+            //System.out.println("identificador: "+ nomeVar); 
             if(tabela.existe(nomeVar) == true){
                 String mensagem="identificador " + nomeVar  + " ja declarado anteriormente";
                 LASemanticoUtils.adicionarErroSemantico(identificador.getStart(), mensagem);
@@ -211,7 +238,11 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             
             //Verificando se eh um vetor
             if(identificador.dimensao().exp_aritmetica(0)!=null){
-                int tamanhoVetor= Integer.parseInt(identificador.dimensao().exp_aritmetica(0).termo(0).fator(0).parcela(0).parcela_unario().NUM_INT().toString()); 
+                int tamanhoVetor;
+                if(identificador.dimensao().exp_aritmetica(0).termo(0).fator(0).parcela(0).parcela_unario().NUM_INT()!=null)
+                    tamanhoVetor= Integer.parseInt(identificador.dimensao().exp_aritmetica(0).termo(0).fator(0).parcela(0).parcela_unario().NUM_INT().toString()); 
+                else
+                    tamanhoVetor=1;
                 nomeVar=identificador.IDENT(0).getText();
                 String nomeVarPadrao=nomeVar+"[";
                 
@@ -246,6 +277,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     
         for (var identificador : ctx.identificador()) {
                     Boolean existeIdentificador;
+                    //System.out.println("identificador: "+ identificador.getText()); 
                     existeIdentificador=tabela.existe(identificador);
                     if(existeIdentificador == false){
                         String mensagem="identificador " + identificador.getText()  + " nao declarado";
@@ -329,7 +361,8 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             String nomeFuncao = ctx.IDENT().getText();
             //Essa subtabela eh a tabela da funcao, ou seja, seus parametros
             TabelaDeSimbolos subTabela=tabela.obtemSubTabela(nomeFuncao);
-            
+            System.out.println(subTabela.obtemTamanhoTabela());
+             System.out.println(ctx.expressao().size());
             //Verificando se o numero de parametros(expressoes) passadas sao do mesmo tamanho do esperado por aquela funcao
             if (subTabela.obtemTamanhoTabela() == ctx.expressao().size()) {
                 

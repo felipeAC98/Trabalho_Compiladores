@@ -24,7 +24,8 @@ public class TabelaDeSimbolos {
         REAL,
         LOGICO,
         INVALIDO,
-        REGISTRO
+        REGISTRO,
+        PROCEDIMENTO
     }
     class EntradaTabelaDeSimbolos{
         String nome;
