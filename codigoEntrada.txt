@@ -1,8 +1,8 @@
 algoritmo
-  declare vetor[5]: inteiro
   declare i: inteiro
-  para i <- 0 ate 4 faca
-    vetor[i] <- i+1
-  fim_para
-  escreva(vetor[0])
+  i <- 1
+  faca
+    escreva(i,"\n")
+    i <- i + 1
+  ate nao (i = 6)
 fim_algoritmo

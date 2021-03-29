@@ -185,10 +185,9 @@ public class TabelaDeSimbolos {
     {
         tabelaDeRegistros.put(nome, tipoRegistro);
     }
+    
     public boolean existeRegistro(String nome)
     {
         return tabelaDeRegistros.containsKey(nome);
     }
-    
-    
 }
