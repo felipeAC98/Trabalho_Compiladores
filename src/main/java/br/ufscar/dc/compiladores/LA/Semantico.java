@@ -15,9 +15,6 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     public TabelaDeSimbolos tabela;
     FileOutputStream saida;
     
-    public Semantico(){
-    }
-    
     public TabelaDeSimbolos getTabela() {
         return tabela;
     }
@@ -38,11 +35,6 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         }
                     
         return visitChildren(ctx);
-    }
-    
-    @Override public TipoLA visitExpressao(LAParser.ExpressaoContext ctx) {
-
-        return visitChildren(ctx); 
     }
     
     @Override public TipoLA visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
@@ -113,6 +105,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             
         }
         else{
+            //Verificando todos comandos do escopo
             for(var cmd: ctx.cmd()){
 
                 //Se nao for uma funcao, nao deve ter return
@@ -160,6 +153,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             String tipoVar=ctx.tipo_basico().getText();
             String nomeVar=ctx.IDENT().getText();
             
+            //Obtendo o tipo da constante
             TipoLA tipoVarLA = LASemanticoUtils.verificaTipoVar(tabela, tipoVar, null); 
             
             if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO){
@@ -209,9 +203,11 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
         //Quando for uma variavel do tipo de um registro, essa variavel vai ser alterada posteriormente
         TabelaDeSimbolos tipoRegistro=null;
-                
+        
+        //Obtendo o tipo da variavel (em texto)
         String tipoVar=ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
         
+        //Verificando se a variavel em questao eh na verdade um ponteiro, caso seja uma flag sera adicionada na tabela
         Boolean tipoP = ctx.tipo().tipo_estendido().pont != null;
         
         //Andando em todas variaveis de um identificador
@@ -223,11 +219,11 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                 LASemanticoUtils.adicionarErroSemantico(identificador.getStart(), mensagem);
             }
             
-            //Obtendo o tipo da variavel
+            //Obtendo o tipo da variavel (no tipo LA)
             TipoLA tipoVarLA = LASemanticoUtils.verificaTipoVar(tabela, tipoVar, tipoRegistro); 
             
+            //Verificando se o tipo eh invalido, caso seja um erro sera reportado
             if(tipoVarLA==br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.INVALIDO){
-                //System.out.println("Tipo errado: "+ tipoVar);
                 String mensagem="tipo " + tipoVar  + " nao declarado";
                 LASemanticoUtils.adicionarErroSemantico(identificador.getStart(), mensagem);
             }
@@ -239,9 +235,12 @@ public class Semantico extends LABaseVisitor<TipoLA>{
             //Verificando se eh um vetor
             if(identificador.dimensao().exp_aritmetica(0)!=null){
                 int tamanhoVetor;
+                //Obtendo tamanho do vetor
                 if(identificador.dimensao().exp_aritmetica(0).termo(0).fator(0).parcela(0).parcela_unario().NUM_INT()!=null)
+                    //Mantendo por motivos legados, nao eh necessario saber o tamanho do vetor
                     tamanhoVetor= Integer.parseInt(identificador.dimensao().exp_aritmetica(0).termo(0).fator(0).parcela(0).parcela_unario().NUM_INT().toString()); 
                 else
+                    //Usar o vetor como 1 ja eh o suficiente uma vez que nao vamos verificar se a posicao escolhida existe
                     tamanhoVetor=1;
                 nomeVar=identificador.IDENT(0).getText();
                 String nomeVarPadrao=nomeVar+"[";
@@ -250,20 +249,10 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                 for(int i =0; i<tamanhoVetor; i++){
                     nomeVar=nomeVarPadrao+Integer.toString(i)+"]"; 
                     tabela.adicionar(nomeVar, tipoVarLA, tipoP,tipoRegistro);
-                    //System.out.println("nomeVar: "+ nomeVar); 
                 }
-            
-                //Caso precise de uma matriz, precisa fazer em cima dessa iteracao ai
-                /*for (var exp : identificador.dimensao().exp_aritmetica()) { 
-                    for(var termo : exp.termo()){
-                        for(var fator : termo.fator()){
-                            for(var parcela : fator.parcela()){
-                                System.out.println(parcela.parcela_unario().NUM_INT().toString()); 
-                            }
-                        }
-                    }
-                }*/
+
             }
+            //Caso nao seja um vetor, somente uma instancia da variavel sera inserida na tabela
             else
                 tabela.adicionar(nomeVar, tipoVarLA, tipoP,tipoRegistro);  
         }
@@ -274,10 +263,8 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     @Override public TipoLA visitCmdleia(LAParser.CmdleiaContext ctx) {
         
         //Verificando se todos identificadores/parametros que sao chamados no leia existem na tabela
-    
         for (var identificador : ctx.identificador()) {
                     Boolean existeIdentificador;
-                    //System.out.println("identificador: "+ identificador.getText()); 
                     existeIdentificador=tabela.existe(identificador);
                     if(existeIdentificador == false){
                         String mensagem="identificador " + identificador.getText()  + " nao declarado";
@@ -289,6 +276,8 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     }
     
     @Override public TipoLA visitCmdescreva(LAParser.CmdescrevaContext ctx) {
+        //Verificando se os tipos das variaveis dentro do comando sao consistentes
+        //Caso nao sejam a verificacao do tipo ja ira inserir o erro na lista de erros
         for (var expressao : ctx.expressao()) {
             LASemanticoUtils.verificarTipo(tabela, expressao);
         }
@@ -299,18 +288,17 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         var identificador = ctx.identificador();
         var expressao = ctx.expressao();
         
-        //System.out.println(identificador.getText());         
-        
         //Verificando se o identificador esta na tabela antes de prosseguir
         if(tabela.existe(identificador)==false){
             String mensagem="identificador " + identificador.getText()+ " nao declarado";
             LASemanticoUtils.adicionarErroSemantico(identificador.start, mensagem );
+            //Se o identificador nao estiver na tabela, os demais erros da atribuicao serao descartados
             return visitChildren(ctx);
         }
+        //Obtendo o tipo do identificador
         TipoLA tipoIdentificador=tabela.verificar(identificador);
+        //Obtendo o tipo da expressao, caso exista algum erro interno nela o erro sera inserido dentro da lista de erros
         TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
-
-        //System.out.println(tipoIdentificador);
 
         //Nao devemos ter erros quando o identificador for real e a expressao inteiro ou viceversa
         if(tipoExpressao==TabelaDeSimbolos.TipoLA.REAL || tipoExpressao==TabelaDeSimbolos.TipoLA.INTEIRO){
@@ -321,7 +309,8 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         
         //Se o tipo for invalido ira anotar oerro
         if(tipoExpressao==TabelaDeSimbolos.TipoLA.INVALIDO || tipoIdentificador!=tipoExpressao){
-           if(tabela.verificarPonteiro(identificador)){
+           //Verificando se o identificador eh um ponteiro para responder a mensagem de erro de forma correta
+            if(tabela.verificarPonteiro(identificador)){
                 LASemanticoUtils.adicionarErroSemantico(identificador.start, "atribuicao nao compativel para ^" + identificador.getText());
            }
            else{
@@ -334,6 +323,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     
     @Override public TipoLA visitCmdenquanto(LAParser.CmdenquantoContext ctx) { 
        
+        //Verificando se a expressao dentro do enquanto esta correta
         TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, ctx.expressao());
         
         return visitChildren(ctx); 
@@ -341,32 +331,22 @@ public class Semantico extends LABaseVisitor<TipoLA>{
     
     @Override public TipoLA visitCmdpara(LAParser.CmdparaContext ctx) {
         
-        //Adicionando na tabela o iterador "i"
+        //Adicionando na tabela o iterador "i" para que ele seja encontrado quando for utilizado dentro da repeticao
         tabela.adicionar(ctx.IDENT().getText(), TabelaDeSimbolos.TipoLA.INTEIRO);  
         return visitChildren(ctx); 
     }
-    
-    @Override public TipoLA visitCmdretorne(LAParser.CmdretorneContext ctx) { 
-        
-        //somente para passar no teste 16, devera ser retirado/ inserido verificacao de que
-        //esta em um procedimento/funcao para funcionar da maneira correta
-        //String mensagem="comando retorne nao permitido nesse escopo";
-        //LASemanticoUtils.adicionarErroSemantico(ctx.expressao().getStart(), mensagem);
-
-        return visitChildren(ctx); 
-    } 
 
     @Override public TipoLA visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
+        //Verificando se existe algum identificador (sera uma funcao ou procedimento caso exista)
         if (ctx.IDENT() != null) {
             String nomeFuncao = ctx.IDENT().getText();
-            //Essa subtabela eh a tabela da funcao, ou seja, seus parametros
+            //Essa subtabela eh a tabela da funcao, ou seja, os elementos dessa tabela sao as variaveis parametro da funcao, e seus tipos
             TabelaDeSimbolos subTabela=tabela.obtemSubTabela(nomeFuncao);
-            System.out.println(subTabela.obtemTamanhoTabela());
-             System.out.println(ctx.expressao().size());
+
             //Verificando se o numero de parametros(expressoes) passadas sao do mesmo tamanho do esperado por aquela funcao
             if (subTabela.obtemTamanhoTabela() == ctx.expressao().size()) {
                 
-                //Cada expressao eh um parametro aqui
+                //Cada expressao eh um parametro aqui, todos parametros/expressoes serao comparadas aqui
                 for (int numExpressao = 0; numExpressao < ctx.expressao().size(); numExpressao++) {
                    ExpressaoContext expressao = ctx.expressao(numExpressao);
                    
@@ -374,6 +354,7 @@ public class Semantico extends LABaseVisitor<TipoLA>{
                    TipoLA tipoExpressao = LASemanticoUtils.verificarTipo(tabela, expressao);
                    TipoLA tipoParametro = subTabela.verificar(numExpressao);
                    
+                   //Verificando se o tipo da expressao bate com o parametro da funcao
                    if(tipoExpressao!=tipoParametro){
                        LASemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(), "incompatibilidade de parametros na chamada de " + nomeFuncao);
                    }
@@ -387,9 +368,3 @@ public class Semantico extends LABaseVisitor<TipoLA>{
         return visitChildren(ctx);
     }
 }
-
-//Linha 21: atribuicao nao compativel para classificacao
-
-//15
-//Linha 49: comando retorne nao permitido nesse escopo
-//Fim da compilacao
