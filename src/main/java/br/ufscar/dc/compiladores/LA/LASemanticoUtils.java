@@ -19,6 +19,7 @@ public class LASemanticoUtils {
     
     public static List<String> errosSemanticos = new ArrayList<>();
     
+    //Funcao responsavel por adicionar os erros semanticos em uma lista
     public static void adicionarErroSemantico(Token t, String mensagem)
     {
         int linha = t.getLine();
@@ -29,12 +30,12 @@ public class LASemanticoUtils {
     //Definindo os tipos de expressoes nao unarias
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_nao_unarioContext parcelaNaoUnario) {
      
+        //verificando se eh uma cadeia
         if (parcelaNaoUnario.CADEIA() != null){
-            //System.out.println("CADEIA");
             return TabelaDeSimbolos.TipoLA.LITERAL;
         }
         else{
-            //System.out.println("IDENTIFICADOR");
+            //Se entrar aqui entao temos um identificador
             var identificador= parcelaNaoUnario.identificador();
             
             //Verificando se o identificador ja esta na tabela (foi definido) antes de prosseguir com a tipagem dos elementos
@@ -53,6 +54,8 @@ public class LASemanticoUtils {
     //O objetivo final aqui eh classificar os tipos de cada um dos individuos dentro de uma expressao, isso para um caso unario
     public static TabelaDeSimbolos.TipoLA verificarTipo(TabelaDeSimbolos tabela, LAParser.Parcela_unarioContext parcelaUnario) {
       
+        //Obtendo o tipo do elemento unario
+        
         if (parcelaUnario.NUM_INT() != null)
         {
             //System.out.println("INTEIRO");
@@ -90,8 +93,9 @@ public class LASemanticoUtils {
             return LASemanticoUtils.verificarTipo(tabela, parcelaUnario.expressao(0));
         }
         else{
-            System.out.println(" Parcela unaria nao identificada, retornando null"); 
-            return TabelaDeSimbolos.TipoLA.LITERAL; //coloquei só pra buildar mas tá errado!!!
+            //Nao entra aqui em momento nenhum, uma expressao sempre ira ser um dos tipos definidos anteriormente
+            //System.out.println(" Parcela unaria nao identificada, retornando null"); 
+            return TabelaDeSimbolos.TipoLA.LITERAL;
         
         }
        
@@ -251,6 +255,7 @@ public class LASemanticoUtils {
         return ret;
     }
     
+    //Funcao responsavel por verificar o tipo de uma variavel quando o tipo passado for uma string
     public static TabelaDeSimbolos.TipoLA verificaTipoVar(TabelaDeSimbolos tabela, String tipoVar, TabelaDeSimbolos tipoRegistro){
          
         TabelaDeSimbolos.TipoLA tipoVarLA;
@@ -274,7 +279,7 @@ public class LASemanticoUtils {
                 //System.out.println("Tipo certo: "+ tipoVar); 
                 break;
             default:
-                //verificando se existe um registro deste tipo
+                //verificando se existe um registro deste tipo antes de definir o tipo da variavel como sendo registro
                 if(tabela.existe(tipoVar) == true){
                     tipoVarLA = br.ufscar.dc.compiladores.LA.TabelaDeSimbolos.TipoLA.REGISTRO;
                 }
@@ -287,74 +292,5 @@ public class LASemanticoUtils {
             }
         return tipoVarLA;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /*private static TabelaDeSimbolos.TipoAlguma verificarTipo(TabelaDeSimbolos tabela, LAParser.Exp_aritmeticaContext ctx)
-    {
-        TabelaDeSimbolos.TipoAlguma ret = null;
-        for(var ta: ctx.termoAritmetico())
-        {
-            TabelaDeSimbolos.TipoAlguma aux = verificarTipo(tabela, ta);
-            if(ret == null)
-            {
-                ret = aux;
-            }
-            else if (ret != aux && aux != TabelaDeSimbolos.TipoAlguma.INVALIDO){
-                adicionarErroSemantico(ctx.start, "Expressão "+ctx.getText()+ " contém tipos incompatíveis");
-                ret = TabelaDeSimbolos.TipoAlguma.INVALIDO;
-            }
-        }
-        return ret;
-    }*/
-    
-    /*
-    private static TabelaDeSimbolos.TipoAlguma verificarTipo(TabelaDeSimbolos tabela, LAParser.Exp_aritmeticaContext ctx)
-    {
-        if(ctx.NUMINT() != null)
-        {
-            return TabelaDeSimbolos.TipoAlguma.INTEIRO;
-        } else if(ctx.NUMREAL()!=null)
-        {
-            return TabelaDeSimbolos.TipoAlguma.REAL;
-        }
-        else if(ctx.expressaoAritmetica() != null)
-        {
-            return verificarTipo(tabela, ctx.expressaoAritmetica());
-        }
-        else
-        {
-            String nomeVar = ctx.VARIAVEL().getText();
-            if(!tabela.existe(nomeVar))
-            {
-                adicionarErroSemantico(ctx.VARIAVEL().getSymbol(), "Variável " +nomeVar+" não foi declarada antes do uso");
-                return TabelaDeSimbolos.TipoAlguma.INVALIDO;
-            }
-            //return verificarTipo(tabela, nomeVar);
-        }
-        return verificarTipo(tabela, ctx.expressaoAritmetica());
-    }*/
-    //private static TabelaSimbolos.TipoAlguma verificarTipo(TabelaSimbolos tabela, String nomeVar)
-    //{
-    //    return tabela.verificar(nomeVar);
-    //}
-
-    
-    
-    
-    
     
 }
